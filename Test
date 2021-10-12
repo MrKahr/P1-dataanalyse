@@ -1,12 +1,17 @@
+length_hard = int(input("Please enter your length at state 'hard' "))
 
-def measure(length_hard)
-  if length_hard <= 7
+
+def measure(length_hard):
+  if length_hard <= 7:
     print("Micro")
-  elif length_hard > 7 or length_hard <= 14
+  elif length_hard > 7 or length_hard <= 14:
     print("Average")
-  elif length_hard > 14 or length <= 17
+  elif length_hard > 14 or length_hard <= 17:
     print("Nice dude")
-   elif length_hard > 17
+  elif length_hard > 17:
     print("Monster!")
-   else
+  else:
     print("Please enter a valid number")
+    
+
+measure(length_hard)
