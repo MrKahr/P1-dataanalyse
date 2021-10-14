@@ -1,2 +1,2 @@
 # P1-dataanalyse
-Code for a first-year data analysis at Aalborg University
+Code for a first semester data science BA course at Aalborg University
