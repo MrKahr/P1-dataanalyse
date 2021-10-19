@@ -27,3 +27,5 @@ def mdl_ex(df):
         mdl_sum += row['MedalValue']
     
     print(f'total sum of medal points earned by women in athletics: {mdl_sum}')
+
+mdl_ex(df)
