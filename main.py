@@ -1,5 +1,5 @@
 import pandas as pd
-import find_sport_and_event as find
+import function_folder.find_sport_and_event as find
 
 file_path = 'athlete_events.csv'
 df = pd.read_csv(file_path)
