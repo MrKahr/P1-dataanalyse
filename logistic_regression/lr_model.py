@@ -4,18 +4,20 @@ import matplotlib.pyplot as plt
 from sympy import symbols, diff
 
 #import training data as pandas dataframe
-X_train = pd.read_csv("train_X.csv")
-Y_train = pd.read_csv("train_Y.csv")
+X_train = pd.read_csv("X_train_HWAY.csv")
+Y_train = pd.read_csv("Y_train_HWAY.csv")
+
+
 
 #import testing data as pandas dataframe
-X_test = pd.read_csv("test_X.csv")
-Y_test = pd.read_csv("test_Y.csv")
+X_test = pd.read_csv("X_test_HWAY.csv")
+Y_test = pd.read_csv("Y_test_HWAY.csv")
 
 # drop id column from dataframes
-X_train = X_train.drop("Id", axis = 1)
-Y_train = Y_train.drop("Id", axis = 1)
-X_test = X_test.drop("Id", axis = 1)
-Y_test = Y_test.drop("Id", axis = 1)
+X_train = X_train.drop("ID", axis = 1)
+Y_train = Y_train.drop("ID", axis = 1)
+X_test = X_test.drop("ID", axis = 1)
+Y_test = Y_test.drop("ID", axis = 1)
 
 # define training and testing dataframes as variables
 X_train = X_train.values
@@ -43,7 +45,6 @@ def sigmoid(x):
 
 
 def model(X, Y, learning_rate, iterations):
-    
     m = X_train.shape[1]
     n = X_train.shape[0]
     
@@ -53,7 +54,6 @@ def model(X, Y, learning_rate, iterations):
     cost_list = []
     
     for i in range(iterations):
-        
         Z = np.dot(W.T, X) + B
         A = sigmoid(Z)
         
@@ -70,7 +70,35 @@ def model(X, Y, learning_rate, iterations):
         # Keeping track of our cost function value
         cost_list.append(cost)
         
-        if(i%(iterations/10) == 0):
+        if(i%(iterations/100) == 0):
             print("cost after ", i, "iteration is : ", cost)
         
     return W, B, cost_list
+
+
+def accuracy(X, Y, W, B):
+    Z = np.dot(W.T, X) + B
+    A = sigmoid(Z)
+    
+    A = A > 0.5
+    
+    A = np.array(A, dtype = 'int64')
+    
+    acc = (1 - np.sum(np.absolute(A - Y))/Y.shape[1])*100
+    
+    print("Accuracy of the model is : ", round(acc, 2), "%")
+
+
+def run_model():
+    iterations = 500000
+    learning_rate = 0.00015
+    W, B, cost_list = model(X_train, Y_train, learning_rate = learning_rate, iterations = iterations)
+    
+    accuracy(X_test, Y_test, W, B)
+    
+    plt.plot(np.arange(iterations), cost_list)
+    plt.show()
+
+
+run_model()
+
