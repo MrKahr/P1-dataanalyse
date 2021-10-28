@@ -90,7 +90,7 @@ def accuracy(X, Y, W, B):
 
 
 def run_model():
-    iterations = 500000
+    iterations = 1000000
     learning_rate = 0.00015
     W, B, cost_list = model(X_train, Y_train, learning_rate = learning_rate, iterations = iterations)
     
