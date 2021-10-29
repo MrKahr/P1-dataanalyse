@@ -1,10 +1,4 @@
 import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-import scipy as sp
-from seaborn.categorical import boxenplot
-import random
 
 
 # ! Find all sports

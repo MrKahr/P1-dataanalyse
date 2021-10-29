@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from sympy import symbols, diff
 
 #import training data as pandas dataframe
 X_train = pd.read_csv("X_train_HWAY.csv")
@@ -90,7 +89,7 @@ def accuracy(X, Y, W, B):
 
 
 def run_model():
-    iterations = 1000000
+    iterations = 3000
     learning_rate = 0.00015
     W, B, cost_list = model(X_train, Y_train, learning_rate = learning_rate, iterations = iterations)
     

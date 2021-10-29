@@ -1,11 +1,6 @@
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-import scipy as sp
-from seaborn.categorical import boxenplot
 import random
-
 
 filepath = 'athlete_events.csv'
 
@@ -36,9 +31,6 @@ df_c = df[(df.Sex == 'M') &
 
 dfss = [df_a, df_b, df_c]
 df = pd.concat(dfss)
-
-#(df.Event == 'Athletics Men\'s Hammer Throw') & 
-#        (df.Event == 'Athletics Men\'s Discus Throw') & 
 
 # Make MedalValue column
 conditions = [(df['Medal'] == 'Gold'),
