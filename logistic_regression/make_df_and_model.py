@@ -32,7 +32,7 @@ def make_df_for_model(df, X_list, Y_list):
 
     print(f'length of df_1: {len(df_1)}')
     print(f'length of df_0: {len(df_0)}')
-    df_0 = df_0.drop(df_0[df_0.Bonk >= dims].index)
+    df_0 = df_0.drop(df_0[df_0.Bonk > dims].index)
     print(f'length of df_0 after reduction: {len(df_0)}')
 
     # concatinate df_0 and df_1
@@ -45,8 +45,8 @@ def make_df_for_model(df, X_list, Y_list):
 
         df.at[i,'Bonk'] = newVal
 
-    df_test = df[(df.Bonk < 0.34)]
-    df_train = df[(df.Bonk >= 0.34)]
+    df_test = df[(df.Bonk < 0.25)]
+    df_train = df[(df.Bonk >= 0.25)]
 
     # Reduce and split X and Y dataframes
     X_train = df_train[X_list]
@@ -204,7 +204,8 @@ if True:
             (df.Age > 1) &
             (df.Weight > 1) & 
             (df.Year > 1945) &
-            (df.Sport == 'Athletics')]
+            (df.Sport == 'Athletics')
+            ]
     
     print(f'length of df of Athletics: {len(df)}')
 
@@ -216,4 +217,4 @@ Y_list = ['ID', 'MedalValue']
 make_df_for_model(df, X_list, Y_list)
 
 # Run model
-run_model(iterations=1000000, learning_rate=0.0002, test=False)
+run_model(iterations=3500, learning_rate=0.0002, test=False)
