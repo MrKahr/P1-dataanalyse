@@ -1,3 +1,9 @@
+'''
+Credit to GitHub user Jaimin09
+Link: https://github.com/Jaimin09/Coding-Lane-Assets/tree/main/Logistic%20Regression%20in%20Python%20from%20Scratch
+Last accessed: 28/10/2021
+'''
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -176,25 +182,6 @@ def run_model(iterations, learning_rate, test, plot):
     return acc
 
 
-# ! Dataframe
-if True:
-    print(f'length of df: {len(df)}')
-    
-    df = df[(df.Sex == 'M') & 
-            (df.Height > 130) &
-            (df.Age > 1) &
-            (df.Weight > 1) & 
-            (df.Year >= 1960) &
-            (df.Sport == 'Athletics')
-            ]
-    
-    print(f'length of df of Athletics: {len(df)}')
-
-# ! Variable list for X and Y
-X_list = ['ID', 'Height', 'Weight', 'Age']
-Y_list = ['ID', 'MedalValue']
-
-
 # ! Run multiple iterations of the model
 def run_more(times, iterations, learning_rate, test= False, plot= False):
     acc_list = []
@@ -215,5 +202,23 @@ def run_more(times, iterations, learning_rate, test= False, plot= False):
     print(f'the average accuracy of the model over {times} iterations is: ', round(acc_avg, 2), '%')
     print(f'the lowest accuracy of the model over {times} iterations is', round(acc_min, 2), '%')
     print(f'the highest accuracy of the model over {times} iterations is', round(acc_max, 2), '%')
+
+
+# ! Dataframe
+print(f'length of df: {len(df)}')
+
+df = df[(df.Sex == 'M') & 
+        (df.Height > 130) &
+        (df.Age > 1) &
+        (df.Weight > 1) & 
+        (df.Year >= 1960) &
+        (df.Sport == 'Athletics')
+        ]
+
+print(f'length of df of Athletics: {len(df)}')
+
+# ! Variable list for X and Y
+X_list = ['ID', 'Height', 'Weight', 'Age']
+Y_list = ['ID', 'MedalValue']
 
 run_more(times = 5, iterations= 3500, learning_rate= 0.0002)
