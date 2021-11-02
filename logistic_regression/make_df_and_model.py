@@ -3,6 +3,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import random
 
+# ! Get dataset
+filepath = 'athlete_events.csv'
+df = pd.read_csv(filepath)
+
 
 # ! Make the X and Y data frames
 def make_df_for_model(df, X_list, Y_list):
@@ -102,8 +106,9 @@ def model(X, Y, learning_rate, iterations):
         # Keeping track of our cost function value
         cost_list.append(cost)
         
-        if(i % (iterations / 20) == 0):
-            print("cost after ", i, "iteration is : ", cost)
+        if False:
+            if(i % (iterations / 20) == 0):
+                print("cost after ", i, "iteration is : ", cost)
         
     return W, B, cost_list
 
@@ -121,7 +126,10 @@ def accuracy(X, Y, W, B):
     # Calculate accuracy
     acc = (1 - np.sum(np.absolute(sig_func - Y)) / Y.shape[1]) * 100
     
-    print("Accuracy of the model is : ", round(acc, 2), "%")
+    if False:
+        print("Accuracy of the model is : ", round(acc, 2), "%")
+    
+    return acc
 
 
 # ! run model
@@ -159,43 +167,16 @@ def run_model(iterations, learning_rate, test):
 
     W, B, cost_list = model(X_train, Y_train, learning_rate, iterations)
     
-    accuracy(X_test, Y_test, W, B)
+    acc = accuracy(X_test, Y_test, W, B)
     
-    plt.plot(np.arange(iterations), cost_list)
-    plt.show()
+    if False:
+        plt.plot(np.arange(iterations), cost_list)
+        plt.show()
+    
+    return acc
 
 
-# Get dataset
-filepath = 'athlete_events.csv'
-df = pd.read_csv(filepath)
-
-# ! SHD dataframe
-if False:
-    # Reduce dataframe
-    df_a = df[(df.Sex == 'M') & 
-            (df.Height > 130) &
-            (df.Age > 1) &
-            (df.Weight > 1) & 
-            (df.Event == 'Athletics Men\'s Shot Put')]
-
-    df_b = df[(df.Sex == 'M') & 
-            (df.Height > 130) &
-            (df.Age > 1) &
-            (df.Weight > 1) & 
-            (df.Event == 'Athletics Men\'s Hammer Throw')]
-
-    df_c = df[(df.Sex == 'M') & 
-            (df.Height > 130) &
-            (df.Age > 1) &
-            (df.Weight > 1) & 
-            (df.Event == 'Athletics Men\'s Discus Throw')]
-
-    # Concatinate dataframes
-    dfss = [df_a, df_b, df_c]
-    df = pd.concat(dfss)
-
-
-# ! Atheletics dataframe
+# ! Dataframe
 if True:
     print(f'length of df: {len(df)}')
     
@@ -203,18 +184,36 @@ if True:
             (df.Height > 130) &
             (df.Age > 1) &
             (df.Weight > 1) & 
-            (df.Year > 1945) &
+            (df.Year >= 1960) &
             (df.Sport == 'Athletics')
             ]
     
     print(f'length of df of Athletics: {len(df)}')
 
-# Variable list for X and Y
+# ! Variable list for X and Y
 X_list = ['ID', 'Height', 'Weight', 'Age']
 Y_list = ['ID', 'MedalValue']
 
-# Make X_train, Y_train, X_test, Y_test
-make_df_for_model(df, X_list, Y_list)
 
-# Run model
-run_model(iterations=3500, learning_rate=0.0002, test=False)
+# ! Run multiple iterations of the model
+def run_more(times):
+    acc_list = []
+    
+    for i in range(times):
+        # Make X_train, Y_train, X_test, Y_test
+        make_df_for_model(df, X_list, Y_list)
+
+        # Run model
+        acc = run_model(iterations=3500, learning_rate=0.0002, test=False)
+        
+        acc_list.append(acc)
+    
+    acc_avg = sum(acc_list) / len(acc_list)
+    acc_min = min(acc_list)
+    acc_max = max(acc_list)
+    
+    print(f'the average accuracy of the model over {times} iterations is: ', round(acc_avg, 2), '%')
+    print(f'the lowest accuracy of the model over {times} iterations is', round(acc_min, 2), '%')
+    print(f'the highest accuracy of the model over {times} iterations is', round(acc_max, 2), '%')
+
+run_more(50)
