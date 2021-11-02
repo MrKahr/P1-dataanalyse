@@ -133,7 +133,7 @@ def accuracy(X, Y, W, B):
 
 
 # ! run model
-def run_model(iterations, learning_rate, test):
+def run_model(iterations, learning_rate, test, plot):
     #import training data as pandas dataframe
     X_train = pd.read_csv("X_train.csv")
     Y_train = pd.read_csv("Y_train.csv")
@@ -169,7 +169,7 @@ def run_model(iterations, learning_rate, test):
     
     acc = accuracy(X_test, Y_test, W, B)
     
-    if False:
+    if plot:
         plt.plot(np.arange(iterations), cost_list)
         plt.show()
     
@@ -196,7 +196,7 @@ Y_list = ['ID', 'MedalValue']
 
 
 # ! Run multiple iterations of the model
-def run_more(times):
+def run_more(times, iterations, learning_rate, test= False, plot= False):
     acc_list = []
     
     for i in range(times):
@@ -204,7 +204,7 @@ def run_more(times):
         make_df_for_model(df, X_list, Y_list)
 
         # Run model
-        acc = run_model(iterations=3500, learning_rate=0.0002, test=False)
+        acc = run_model(iterations, learning_rate, test, plot)
         
         acc_list.append(acc)
     
@@ -216,4 +216,4 @@ def run_more(times):
     print(f'the lowest accuracy of the model over {times} iterations is', round(acc_min, 2), '%')
     print(f'the highest accuracy of the model over {times} iterations is', round(acc_max, 2), '%')
 
-run_more(50)
+run_more(times = 5, iterations= 3500, learning_rate= 0.0002)
