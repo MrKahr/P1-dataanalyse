@@ -83,7 +83,7 @@ df = pd.concat(dfss)
 X_list = ['ID', 'Height', 'Weight', 'Age']
 Y_list = ['ID', 'MedalValue']
 
-# ! Mens Shot Put, Hammer Throw and Discus Throw
+# ! Mens Shot Put, Hammer Throw and Discus Throw after 1960
 # length of df_1: 125
 # the average accuracy of the model over 50 iterations is:  53.39 %
 # the lowest accuracy of the model over 50 iterations is 37.84 %
