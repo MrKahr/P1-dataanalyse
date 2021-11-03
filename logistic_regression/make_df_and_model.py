@@ -10,53 +10,37 @@ import matplotlib.pyplot as plt
 import random
 
 # ! Get dataset
-filepath = 'athlete_events.csv'
+filepath = 'csv_with_columns-HWAM.csv'
 df = pd.read_csv(filepath)
 
 
 # ! Make the X and Y data frames
 def make_df_for_model(df, X_list, Y_list):
-    # Make MedalValue column
-    conditions = [(df['Medal'] == 'Gold'),
-                (df['Medal'] == 'Silver'),
-                (df['Medal'] == 'Bronze'),
-                (df['Medal'] == 'NA')]
-
-    values = [1,1,1,0]
-
-    df['MedalValue'] = np.select(conditions,values)
-
     # Split dataframe into won a medal and didnt win a medal
-    df_0 = df[(df.MedalValue == 0)]
-    df_1 = df[(df.MedalValue == 1)]
+    df_0 = df[df.MedalEarned == 0]
+    df_1 = df[df.MedalEarned == 1]
 
     # add random number between 0 and 1 to all id
     # Make sure there are same amount of 1 and 0
-    for i, row in df_0.iterrows():
-        newVal = random.random()
+    df_Bonk = pd.DataFrame(np.random.random(size = (len(df_0), 1)), columns= ['Bonk'])
+    df_0_Bonk = df_0.join(df_Bonk)
+    
+    # Drop df_0_Bonk to approx size of df_1
+    dims = (len(df_1) / len(df_0_Bonk))
+    df_0_even = df_0_Bonk[df_0_Bonk.Bonk <= dims]
 
-        df_0.at[i,'Bonk'] = newVal
-
-    # Drop df_0 to approx size of df_1
-    dims = (len(df_1) / len(df_0) )
-
-    print(f'length of df_1: {len(df_1)}')
-    print(f'length of df_0: {len(df_0)}')
-    df_0 = df_0.drop(df_0[df_0.Bonk > dims].index)
-    print(f'length of df_0 after reduction: {len(df_0)}')
-
-    # concatinate df_0 and df_1
-    dfs = [df_0, df_1]
-    df = pd.concat(dfs)
+    # concatinate df_0_even and df_1
+    dfs = [df_0_even, df_1]
+    df_even = pd.concat(dfs)
 
     # Make test and train dataframes
-    for i, row in df.iterrows():
+    for i, row in df_even.iterrows():
         newVal = random.random()
 
-        df.at[i,'Bonk'] = newVal
+        df_even.at[i,'Bonk'] = newVal
 
-    df_test = df[(df.Bonk < 0.25)]
-    df_train = df[(df.Bonk >= 0.25)]
+    df_test = df_even[df_even.Bonk < 0.25]
+    df_train = df_even[df_even.Bonk >= 0.25]
 
     # Reduce and split X and Y dataframes
     X_train = df_train[X_list]
@@ -194,6 +178,9 @@ def run_more(times, iterations, learning_rate, test= False, plot= False):
         acc = run_model(iterations, learning_rate, test, plot)
         
         acc_list.append(acc)
+        
+        if len(acc_list) % 5 == 0:
+            print(f'on iteration {len(acc_list)} now and still going strong!!!')
     
     acc_avg = sum(acc_list) / len(acc_list)
     acc_min = min(acc_list)
@@ -204,21 +191,8 @@ def run_more(times, iterations, learning_rate, test= False, plot= False):
     print(f'the highest accuracy of the model over {times} iterations is', round(acc_max, 2), '%')
 
 
-# ! Dataframe
-print(f'length of df: {len(df)}')
-
-df = df[(df.Sex == 'M') & 
-        (df.Height > 130) &
-        (df.Age > 1) &
-        (df.Weight > 1) & 
-        (df.Year >= 1960) &
-        (df.Sport == 'Athletics')
-        ]
-
-print(f'length of df of Athletics: {len(df)}')
-
 # ! Variable list for X and Y
-X_list = ['ID', 'Height', 'Weight', 'Age']
-Y_list = ['ID', 'MedalValue']
+X_list = ['ID', 'Height_div_avg', 'Weight_div_avg', 'Age_div_avg']
+Y_list = ['ID', 'MedalEarned']
 
-run_more(times = 5, iterations= 3500, learning_rate= 0.0002)
+run_more(times = 50, iterations= 3500, learning_rate= 0.0002)
