@@ -6,6 +6,30 @@ import pandas as pd
 filepath = 'athlete_events.csv'
 df = pd.read_csv(filepath)
 
+filepath_2 = 'csv_with_columns-HWMA.csv'
+df_HWAM = pd.read_csv(filepath)
+
+# ? all results underneath are run with theese parameters:
+# ? run_more(times = 50, iterations= 3500, learning_rate= 0.0002)
+
+# ! Mens atheletics af 1960 
+# ! with diviation of Height/Weight/Age from average per year
+# ! and MedalEarned
+# length of df_1: 1395
+# the average accuracy of the model over 50 iterations is:  58.26 %
+# the lowest accuracy of the model over 50 iterations is 54.33 %
+# the highest accuracy of the model over 50 iterations is 62.46 %
+df_HWAM = df_HWAM[(df_HWAM.Sex == 'M') & 
+        (df_HWAM.Height > 1) &
+        (df_HWAM.Age > 1) &
+        (df_HWAM.Weight > 1) & 
+        (df_HWAM.Year >= 1960) &
+        (df_HWAM.Sport == 'Athletics')
+        ]
+
+X_list = ['ID', 'Height_div_avg', 'Weight_div_avg', 'Age_div_avg']
+Y_list = ['ID', 'MedalEarned']
+
 # ! Mens atheletics after 1960
 # length of df_1: 1395
 # the average accuracy of the model over 50 iterations is:  56.32 %
