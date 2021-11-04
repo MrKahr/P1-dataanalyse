@@ -9,10 +9,10 @@ df = pd.read_csv(file_path)
 
 
 def find_ex(df): 
-    df_women = df[(df.Sex == 'F')]
-    df_sport = df_women[(df.Sport == 'Athletics')]
+    df_men = df[(df.Sex == 'M')]
+    df_sport = df_men[(df.Sport == 'Athletics')]
     
-    pd.set_option('display.max_rows',100)
+    pd.set_option('display.max_rows',300)
     print(find.find_event(df_sport))
 
 
@@ -28,4 +28,6 @@ def mdl_ex(df):
     
     print(f'total sum of medal points earned by women in athletics: {mdl_sum}')
 
-mdl_ex(df)
+#mdl_ex(df)
+
+find_ex(df)
