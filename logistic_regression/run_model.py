@@ -7,7 +7,6 @@ Last accessed: 28/10/2021
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import random
 
 # ! Get dataset
 filepath = 'csv_with_columns-HWAM.csv'
@@ -184,4 +183,4 @@ def run_more(times, iterations, learning_rate, test= False, plot= False):
 X_list = ['ID', 'Height_div_avg', 'Weight_div_avg', 'Age_div_avg']
 Y_list = ['ID', 'MedalEarned']
 
-run_more(times = 5, iterations= 3500, learning_rate= 0.0002)
+run_more(times = 50, iterations= 3500, learning_rate= 0.0002)
