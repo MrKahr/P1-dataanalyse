@@ -9,6 +9,35 @@ df = pd.read_csv(filepath)
 filepath_2 = 'csv_with_columns-HWMA.csv'
 df_HWAM = pd.read_csv(filepath)
 
+filepath_3 = 'df_MPHWA_Athletics.csv'
+df_MPHWA = pd.read_csv(filepath_3)
+
+# ? all results underneath are run with theese parameters:
+# ? run_more(times = 50, iterations= 5000, learning_rate= 0.03)
+
+# ! Mens atheletics af 1960 
+# ! with diviation of Height/Weight/Age from average per year
+# ! and MedalEarned
+# ! and PreviousMedals
+# length of df_1: 1395
+# the average accuracy of the model over 50 iterations is:  62.4 %
+# the lowest accuracy of the model over 50 iterations is 57.45 %
+# the highest accuracy of the model over 50 iterations is 67.34 %
+dfdf_MPHWA = df_MPHWA[(df_MPHWA.Sex == 'M') & 
+                (df_MPHWA.Height > 1) &
+                (df_MPHWA.Age > 1) &
+                (df_MPHWA.Weight > 1) & 
+                (df_MPHWA.Year >= 1960) &
+                (df_MPHWA.Sport == 'Athletics')
+                ]
+
+X_list = ['ID',
+          'PreviousMedals', 
+          'Height_div_avg', 
+          'Weight_div_avg', 
+          'Age_div_avg'
+          ]
+
 # ? all results underneath are run with theese parameters:
 # ? run_more(times = 50, iterations= 3500, learning_rate= 0.0002)
 

@@ -10,13 +10,13 @@ def div_from_avg_per_year(df, vals):
         
         # Make df of average values for given variable per year
         df_g = df.groupby(['Year'])[val].mean()
-        df_g = df_g.reset_index()
-        df_g = df_g.set_index('Year')
+        df_g_r = df_g.reset_index()
+        df_g_s = df_g_r.set_index('Year')
 
         # iterate over given df
         for i, row in df.iterrows():
             # Locate average value for given year
-            avg_val = df_g.loc[row['Year'], val]
+            avg_val = df_g_s.loc[row['Year'], val]
             # Calculate diviation from average for given year
             div_avg = round(row[val] - avg_val, 2)
             
@@ -43,18 +43,17 @@ def medal_earned(df):
     return df
 
 # ! add previous medals earned to observation
-# TODO This is a work in progress
 def previous_medals(df):
     # * Create empty dict
     ID_medals = {}
     
     # * Create PreviousMedals df
-    df_prev_med = pd.DataFrame(size= (len(df), 1), columns= ['PreviousMedals'])
+    df_prev_med = pd.DataFrame(index= range(len(df)), columns= ['PreviousMedals'])
     
     # * sort by ID then by year
-    df.sort_values(by=['MedalEarned'], ascending = False)
-    df.sort_values(by=['ID'], ascending = True)
-    df.sort_values(by=['Year'], ascending = True)
+    df = df.sort_values(by= 'MedalEarned', ascending= False)
+    df = df.sort_values(by= 'ID', ascending= True)
+    df = df.sort_values(by= 'Year', ascending= True)
 
     # * iterate through sorted df and add previous medals to athlete
     for i, row in df.iterrows():
@@ -75,8 +74,11 @@ def previous_medals(df):
             else:
                 df_prev_med.at[i, 'PreviousMedals'] = 0
     
-    df_and_prev_med = df.join(df_prev_med)
-    print(ID_medals)
-                
+    # * Add previous medal column to df
+    df = pd.concat([df,df_prev_med], axis= 1)
+    
+    if False:
+        list = [ID for ID, occurrences in ID_medals.items() if occurrences >= 3]
+        print(list)
 
-    return df_and_prev_med
+    return df

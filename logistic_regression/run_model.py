@@ -9,7 +9,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # ! Get dataset
-filepath = 'csv_with_columns-HWAM.csv'
+filepath = 'df_MPHWA_Athletics.csv'
 df = pd.read_csv(filepath)
 
 
@@ -58,7 +58,7 @@ def sigmoid(x):
 
 
 # ! the model
-def model(X, Y, learning_rate, iterations):
+def model(X, Y, learning_rate, iterations, cost_progress= False):
     m = X.shape[1] # Observations
     n = X.shape[0] # Types of parameters
     
@@ -84,7 +84,7 @@ def model(X, Y, learning_rate, iterations):
         # Keeping track of our cost function value
         cost_list.append(cost)
         
-        if False:
+        if cost_progress:
             if(i % (iterations / 20) == 0):
                 print("cost after ", i, "iteration is : ", cost)
         
@@ -111,7 +111,7 @@ def accuracy(X, Y, W, B):
 
 
 # ! run model
-def run_model(iterations, learning_rate, test, plot):
+def run_model(iterations, learning_rate, plot_print= False, cost_progress= False, test=False):
     #import training data as pandas dataframe
     X_train = pd.read_csv("X_train.csv")
     Y_train = pd.read_csv("Y_train.csv")
@@ -143,11 +143,12 @@ def run_model(iterations, learning_rate, test, plot):
     if test:
         test(X_train, Y_train, X_test, Y_test)
 
-    W, B, cost_list = model(X_train, Y_train, learning_rate, iterations)
+    W, B, cost_list = model(X_train, Y_train, learning_rate, iterations, cost_progress)
     
     acc = accuracy(X_test, Y_test, W, B)
     
-    if plot:
+    if plot_print:
+        print("Accuracy of the model is : ", round(acc, 2), "%")
         plt.plot(np.arange(iterations), cost_list)
         plt.show()
     
@@ -155,7 +156,7 @@ def run_model(iterations, learning_rate, test, plot):
 
 
 # ! Run multiple iterations of the model
-def run_more(times, iterations, learning_rate, test= False, plot= False):
+def run_more(times, iterations, learning_rate, plot_print= False, test= False):
     acc_list = []
     
     for i in range(times):
@@ -163,7 +164,7 @@ def run_more(times, iterations, learning_rate, test= False, plot= False):
         make_df_for_model(df, X_list, Y_list)
 
         # Run model
-        acc = run_model(iterations, learning_rate, test, plot)
+        acc = run_model(iterations, learning_rate, plot_print= False, test= False)
         
         acc_list.append(acc)
         
@@ -180,7 +181,14 @@ def run_more(times, iterations, learning_rate, test= False, plot= False):
 
 
 # ! Variable list for X and Y
-X_list = ['ID', 'Height_div_avg', 'Weight_div_avg', 'Age_div_avg']
+X_list = ['ID',
+          'PreviousMedals', 
+          'Height_div_avg', 
+          'Weight_div_avg', 
+          'Age_div_avg'
+          ]
+
 Y_list = ['ID', 'MedalEarned']
 
-run_more(times = 50, iterations= 3500, learning_rate= 0.0002)
+#run_model(iterations= 5000, learning_rate= 0.03, plot_print= True, cost_progress= True)
+run_more(times = 50, iterations= 5000, learning_rate= 0.03)
