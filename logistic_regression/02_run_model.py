@@ -12,8 +12,8 @@ import matplotlib.pyplot as plt
 filepath = 'df_MPHWA_Athletics.csv'
 df = pd.read_csv(filepath)
 
-
-# ! Import and reshapes X and Y files
+# ! Functions that manipulate dataframes and csv files
+# * Import and reshapes X and Y files
 def import_and_reshape(switch):
     #import data as pandas dataframes
     X = pd.read_csv(f'X_{switch}.csv')
@@ -34,7 +34,7 @@ def import_and_reshape(switch):
     return X, Y
 
 
-# ! Make df even
+# * Make df even
 def even_df(df):
     # Split dataframe into won a medal and didnt win a medal
     df_1 = df[df.MedalEarned == 1]
@@ -46,7 +46,7 @@ def even_df(df):
     return df_1, df_0
 
 
-# ! Make df_test (X_test and Y_test)
+# * Make df_test (X_test and Y_test)
 def test_sampler(df, X_list, Y_list):
     # Even out for test
     df_1, df_0 = even_df(df)
@@ -74,7 +74,7 @@ def test_sampler(df, X_list, Y_list):
     return df_testless
 
 
-# ! Make the X and Y data frames
+# * Make the X and Y data frames
 def make_df_for_model(df, X_list, Y_list):
     # Randomly sample df_0 to size of df_1
     df_1, df_0 = even_df(df)
@@ -108,7 +108,8 @@ def make_df_for_model(df, X_list, Y_list):
     Y_train.to_csv('Y_train.csv', index=False)
 
 
-# ! Test X and Y shapes (prints to varify)
+# ! The functions for the logistic regression model
+# * Test X and Y shapes (prints to varify)
 def test(X_train, Y_train, X_validate, Y_validate):
     print("Shape of X_train : ", X_train.shape)
     print("Shape of Y_train : ", Y_train.shape)
@@ -117,12 +118,12 @@ def test(X_train, Y_train, X_validate, Y_validate):
     print('')
     
 
-# ! Sigmoid function
+# * Sigmoid function
 def sigmoid(x):
     return 1/(1 + np.exp(-x))
 
 
-# ! Ahe model
+# * The model
 def model(X, Y, learning_rate, iterations, cost_progress= False):
     m = X.shape[1] # Observations
     n = X.shape[0] # Types of parameters
@@ -156,7 +157,7 @@ def model(X, Y, learning_rate, iterations, cost_progress= False):
     return W, B, cost_list
 
 
-# ! Accuracy test
+# * Accuracy test
 def accuracy(X, Y, W, B):
     lin_func = np.dot(W.T, X) + B # linear function
     sig_func = sigmoid(lin_func) # Sigmoid function
@@ -172,7 +173,8 @@ def accuracy(X, Y, W, B):
     return acc
 
 
-# ! Run model
+# ! The functions that run the model and report on the model
+# * Run model
 def run_model(iterations, learning_rate, plot_print= False, cost_progress= False, test=False):
     # Import and reshape training and validation dataframes
     X_train, Y_train = import_and_reshape('train')
@@ -194,7 +196,7 @@ def run_model(iterations, learning_rate, plot_print= False, cost_progress= False
     return W, B, acc
 
 
-# ! Print accuracy
+# * Print accuracy
 def print_acc_report(list_of_acc, times, name):
     # Calculate average, min and max accuracy
     acc_avg = sum(list_of_acc) / len(list_of_acc)
@@ -209,7 +211,7 @@ def print_acc_report(list_of_acc, times, name):
     return
 
 
-# ! Run multiple iterations of the model
+# * Run multiple iterations of the model
 def run_more(times, iterations, learning_rate, plot_print= False, test= False):
     W_list = []
     B_list = []
