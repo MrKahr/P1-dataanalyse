@@ -15,19 +15,19 @@ df = pd.read_csv(filepath)
 # ! Functions that manipulate dataframes and csv files
 # * Import and reshapes X and Y files
 def import_and_reshape(switch):
-    #import data as pandas dataframes
+    # Import data as pandas dataframes
     X = pd.read_csv(f'X_{switch}.csv')
     Y = pd.read_csv(f'Y_{switch}.csv')
     
-    # drop id column from dataframes
+    # Drop id column from dataframes
     X = X.drop("ID", axis = 1)
     Y = Y.drop("ID", axis = 1)
     
-    # define dataframes as variables
+    # Define dataframes as variables
     X = X.values
     Y = Y.values
     
-    # reshape dataframes to appropriate shape
+    # Reshape dataframes to appropriate shape
     X = X.T
     Y = Y.reshape(1, X.shape[1])
     
@@ -245,6 +245,7 @@ def run_more(times, iterations, learning_rate, plot_print= False, test= False):
         test_acc = accuracy(X_test, Y_test, W_list[i], B_list[i])
         test_acc_list.append(test_acc)
     
+    # Print accuracy reports
     print_acc_report(acc_list, times, 'accuracy')
     print_acc_report(test_acc_list, times, 'test accuracy')
 
