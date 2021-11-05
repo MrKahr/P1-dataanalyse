@@ -164,7 +164,7 @@ def run_more(times, iterations, learning_rate, plot_print= False, test= False):
         make_df_for_model(df, X_list, Y_list)
 
         # Run model
-        acc = run_model(iterations, learning_rate, plot_print= False, test= False)
+        acc = run_model(iterations, learning_rate, plot_print, test)
         
         acc_list.append(acc)
         
