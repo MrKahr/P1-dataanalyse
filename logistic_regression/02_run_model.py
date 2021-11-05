@@ -15,6 +15,8 @@ df = pd.read_csv(filepath)
 
 # ! Make the X and Y data frames
 def make_df_for_model(df, X_list, Y_list):
+    # TODO Split into train and validation data before merging
+    # TODO Make a seperate test dataset, to validate all parameters
     # Split dataframe into won a medal and didnt win a medal
     df_0 = df[df.MedalEarned == 0]
     df_1 = df[df.MedalEarned == 1]
@@ -27,7 +29,7 @@ def make_df_for_model(df, X_list, Y_list):
     df_even = pd.concat(dfs)
 
     # Make test and train dataframes
-    df_test = df_even.sample(frac= 0.25)
+    df_test = df_even.sample(frac= 0.2)
     df_train = df_even.drop(df_test.index)
 
     # Reduce and split X and Y dataframes
@@ -190,5 +192,5 @@ X_list = ['ID',
 
 Y_list = ['ID', 'MedalEarned']
 
-#run_model(iterations= 5000, learning_rate= 0.03, plot_print= True, cost_progress= True)
-run_more(times = 50, iterations= 5000, learning_rate= 0.03)
+run_model(iterations= 5000, learning_rate= 0.03, plot_print= True, cost_progress= True)
+#run_more(times = 100, iterations= 5000, learning_rate= 0.03)

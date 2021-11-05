@@ -42,6 +42,7 @@ def medal_earned(df):
     
     return df
 
+
 # ! add previous medals earned to observation
 def previous_medals(df):
     # * Create empty dict
