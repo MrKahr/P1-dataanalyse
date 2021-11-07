@@ -45,4 +45,4 @@ def add_theese_and_csv(df, name, medal= True, prev_med= True, div_avg= True, red
     df.to_csv(name + '.csv')
 
 
-add_theese_and_csv(df, 'df_MPHWA')
+add_theese_and_csv(df, 'df_MPHWA_Athletics_3')

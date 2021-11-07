@@ -52,7 +52,6 @@ def previous_medals(df):
     df_prev_med = pd.DataFrame(index= range(len(df)), columns= ['PreviousMedals'])
     
     # * sort by ID then by year
-    df = df.sort_values(by= 'MedalEarned', ascending= False)
     df = df.sort_values(by= 'ID', ascending= True)
     df = df.sort_values(by= 'Year', ascending= True)
 
