@@ -4,7 +4,7 @@ import numpy as np
 
 # ! Find diviation from average for given variable and add column to df
 # TODO add so that it can differentiate between events
-def div_from_avg_per_year(df, vals):
+def DeviationAverage(df, vals):
     for i in range(len(vals)):
         val = vals[i]
         
@@ -22,12 +22,12 @@ def div_from_avg_per_year(df, vals):
             
             # Add diviation to new column in df
             df.at[i, f'{val}_div_avg'] = div_avg
-        
+    
     return df
 
 
 # ! Add MedalEarned to df
-def medal_earned(df):
+def MedalEarned(df):
     # Locate and define medals
     conditions = [(df['Medal'] == 'Gold'),
                   (df['Medal'] == 'Silver'),
@@ -44,7 +44,7 @@ def medal_earned(df):
 
 
 # ! add previous medals earned to observation
-def previous_medals(df):
+def PreviousMedals(df):
     # * Create empty dict
     ID_medals = {}
     
@@ -62,6 +62,7 @@ def previous_medals(df):
                 df_prev_med.at[i, 'PreviousMedals'] = ID_medals[row['ID']]
                 
                 ID_medals[row['ID']] += 1
+            
             else:
                 ID_medals[row['ID']] = 1
                 

@@ -14,7 +14,7 @@ df = pd.read_csv(filepath)
 
 # ! Functions that manipulate dataframes and csv files
 # * Import and reshapes X and Y files
-def import_and_reshape(switch):
+def ImportReshape(switch):
     # Import data as pandas dataframes
     X = pd.read_csv(f'X_{switch}.csv')
     Y = pd.read_csv(f'Y_{switch}.csv')
@@ -35,7 +35,7 @@ def import_and_reshape(switch):
 
 
 # * Make df even
-def even_df(df):
+def EvenDF(df):
     # Split dataframe into won a medal and didnt win a medal
     df_1 = df[df.MedalEarned == 1]
     df_0 = df[df.MedalEarned == 0]
@@ -47,9 +47,10 @@ def even_df(df):
 
 
 # * Make df_test (X_test and Y_test)
-def test_sampler(df, X_list, Y_list):
-    # Even out for test
-    df_1, df_0 = even_df(df)
+def TestSampler(df, X_list, Y_list):
+    # Split dataframe into won a medal and didnt win a medal
+    df_1 = df[df.MedalEarned == 1]
+    df_0 = df[df.MedalEarned == 0]
     
     # Randomly sample test df_1 and df_0
     df_1_test = df_1.sample(n = 150)
@@ -75,9 +76,9 @@ def test_sampler(df, X_list, Y_list):
 
 
 # * Make the X and Y data frames
-def make_df_for_model(df, X_list, Y_list):
+def TrainValidateImport(df, X_list, Y_list):
     # Randomly sample df_0 to size of df_1
-    df_1, df_0 = even_df(df)
+    df_1, df_0 = EvenDF(df)
 
     # Randomly sample validate df_1 and df_0
     df_1_validate = df_1.sample(frac= 0.2)
@@ -110,7 +111,7 @@ def make_df_for_model(df, X_list, Y_list):
 
 # ! The functions for the logistic regression model
 # * Test X and Y shapes (prints to varify)
-def test(X_train, Y_train, X_validate, Y_validate):
+def Test(X_train, Y_train, X_validate, Y_validate):
     print("Shape of X_train : ", X_train.shape)
     print("Shape of Y_train : ", Y_train.shape)
     print("Shape of X_test : ", X_validate.shape)
@@ -119,12 +120,12 @@ def test(X_train, Y_train, X_validate, Y_validate):
     
 
 # * Sigmoid function
-def sigmoid(x):
+def Sigmoid(x):
     return 1/(1 + np.exp(-x))
 
 
 # * The model
-def model(X, Y, learning_rate, iterations, cost_progress= False):
+def Model(X, Y, learning_rate, iterations, cost_progress= False):
     m = X.shape[1] # Observations
     n = X.shape[0] # Types of parameters
     
@@ -135,7 +136,7 @@ def model(X, Y, learning_rate, iterations, cost_progress= False):
     
     for i in range(iterations):
         lin_func = np.dot(W.T, X) + B # Linear function
-        sig_func = sigmoid(lin_func) # Sigmoid function
+        sig_func = Sigmoid(lin_func) # Sigmoid function
         
         # Cost function
         cost = -(1/m)*np.sum( Y*np.log(sig_func) + (1-Y)*np.log(1-sig_func))
@@ -158,9 +159,9 @@ def model(X, Y, learning_rate, iterations, cost_progress= False):
 
 
 # * Accuracy test
-def accuracy(X, Y, W, B):
+def Accuracy(X, Y, W, B):
     lin_func = np.dot(W.T, X) + B # linear function
-    sig_func = sigmoid(lin_func) # Sigmoid function
+    sig_func = Sigmoid(lin_func) # Sigmoid function
     
     sig_func = sig_func > 0.5 # Sets sig_func to one if > 0 or 0 if < 0
     
@@ -175,18 +176,18 @@ def accuracy(X, Y, W, B):
 
 # ! The functions that run the model and report on the model
 # * Run model
-def run_model(iterations, learning_rate, plot_print= False, cost_progress= False, Test=False):
+def RunModel(iterations, learning_rate, plot_print= False, cost_progress= False, test=False):
     # Import and reshape training and validation dataframes
-    X_train, Y_train = import_and_reshape('train')
-    X_validate, Y_validate = import_and_reshape('validate')
+    X_train, Y_train = ImportReshape('train')
+    X_validate, Y_validate = ImportReshape('validate')
     
     #Test dataframes
-    if Test:
-        test(X_train, Y_train, X_validate, Y_validate)
+    if test:
+        Test(X_train, Y_train, X_validate, Y_validate)
 
-    W, B, cost_list = model(X_train, Y_train, learning_rate, iterations, cost_progress)
+    W, B, cost_list = Model(X_train, Y_train, learning_rate, iterations, cost_progress)
     
-    acc = accuracy(X_validate, Y_validate, W, B)
+    acc = Accuracy(X_validate, Y_validate, W, B)
     
     if plot_print:
         print("Accuracy of the model is : ", round(acc, 2), "%")
@@ -197,7 +198,7 @@ def run_model(iterations, learning_rate, plot_print= False, cost_progress= False
 
 
 # * Print accuracy
-def print_acc_report(list_of_acc, times, name):
+def PrintAccReport(list_of_acc, times, name):
     # Calculate average, min and max accuracy
     acc_avg = sum(list_of_acc) / len(list_of_acc)
     acc_min = min(list_of_acc)
@@ -210,21 +211,21 @@ def print_acc_report(list_of_acc, times, name):
 
 
 # * Run multiple iterations of the model
-def run_more(times, iterations, learning_rate, plot_print= False, test= False):
+def RunMore(times, iterations, learning_rate, plot_print= False, test= False):
     W_list = []
     B_list = []
     acc_list = []
     test_acc_list = []
     
     # Create test sample
-    df_testless = test_sampler(df, X_list, Y_list)
+    df_testless = TestSampler(df, X_list, Y_list)
     
     for i in range(times):
         # Make X_train, Y_train, X_validate, Y_validate
-        make_df_for_model(df_testless, X_list, Y_list)
+        TrainValidateImport(df_testless, X_list, Y_list)
 
         # Run model
-        W, B, acc = run_model(iterations, learning_rate, plot_print, test)
+        W, B, acc = RunModel(iterations, learning_rate, plot_print, test)
         
         # Append parameters and accuracy to lists
         W_list.append(W)
@@ -236,20 +237,20 @@ def run_more(times, iterations, learning_rate, plot_print= False, test= False):
             print(f'on iteration {len(acc_list)} now and still going strong!!!')
 
     # Import and reshape test data
-    X_test, Y_test = import_and_reshape('test')
+    X_test, Y_test = ImportReshape('test')
     
     # Test parameters on test data
     for i in range(len(W_list)):
-        test_acc = accuracy(X_test, Y_test, W_list[i], B_list[i])
+        test_acc = Accuracy(X_test, Y_test, W_list[i], B_list[i])
         test_acc_list.append(test_acc)
     
     # Print accuracy reports
-    print_acc_report(acc_list, times, 'accuracy')
-    print_acc_report(test_acc_list, times, 'test accuracy')
+    PrintAccReport(acc_list, times, 'accuracy')
+    PrintAccReport(test_acc_list, times, 'test accuracy')
 
 
 # ! Variable list for X and Y
-X_list = ['ID',
+X_list = ['ID', 
           'PreviousMedals', 
           'Height_div_avg', 
           'Weight_div_avg', 
@@ -258,6 +259,6 @@ X_list = ['ID',
 
 Y_list = ['ID', 'MedalEarned']
 
-#make_df_for_model(df, X_list, Y_list)
-#run_model(iterations= 5000, learning_rate= 0.025, plot_print= True, cost_progress= True)
-run_more(times = 50, iterations= 5000, learning_rate= 0.025)
+#TestAndValidateImport(df, X_list, Y_list)
+#RunModel(iterations= 5000, learning_rate= 0.025, plot_print= True, cost_progress= True)
+RunMore(times = 50, iterations= 5000, learning_rate= 0.025)
