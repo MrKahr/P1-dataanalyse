@@ -52,8 +52,8 @@ def test_sampler(df, X_list, Y_list):
     df_1, df_0 = even_df(df)
     
     # Randomly sample test df_1 and df_0
-    df_1_test = df_1.sample(n = 200)
-    df_0_test = df_0.sample(n = 200)
+    df_1_test = df_1.sample(n = 150)
+    df_0_test = df_0.sample(n = 150)
     
     # Remove test samples from df_1 and df_0
     df = df.drop(df_1_test.index)
@@ -175,13 +175,13 @@ def accuracy(X, Y, W, B):
 
 # ! The functions that run the model and report on the model
 # * Run model
-def run_model(iterations, learning_rate, plot_print= False, cost_progress= False, test=False):
+def run_model(iterations, learning_rate, plot_print= False, cost_progress= False, Test=False):
     # Import and reshape training and validation dataframes
     X_train, Y_train = import_and_reshape('train')
     X_validate, Y_validate = import_and_reshape('validate')
     
     #Test dataframes
-    if test:
+    if Test:
         test(X_train, Y_train, X_validate, Y_validate)
 
     W, B, cost_list = model(X_train, Y_train, learning_rate, iterations, cost_progress)
@@ -207,8 +207,6 @@ def print_acc_report(list_of_acc, times, name):
     print(f'Average {name} over {times} iterations is: ', round(acc_avg, 2), '%')
     print(f'Lowest {name} over {times} iterations is', round(acc_min, 2), '%')
     print(f'Highest {name} over {times} iterations is', round(acc_max, 2), '%')
-    
-    return
 
 
 # * Run multiple iterations of the model
@@ -236,7 +234,7 @@ def run_more(times, iterations, learning_rate, plot_print= False, test= False):
         # Progress bar
         if len(acc_list) % 5 == 0:
             print(f'on iteration {len(acc_list)} now and still going strong!!!')
-    
+
     # Import and reshape test data
     X_test, Y_test = import_and_reshape('test')
     
