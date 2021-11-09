@@ -235,7 +235,7 @@ def RunMore(times, iterations, learning_rate, plot_print= False, test= False):
         # Progress bar
         if len(acc_list) % 5 == 0:
             print(f'on iteration {len(acc_list)} now and still going strong!!!')
-
+    
     # Import and reshape test data
     X_test, Y_test = ImportReshape('test')
     
