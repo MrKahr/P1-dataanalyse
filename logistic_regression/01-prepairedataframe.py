@@ -9,12 +9,32 @@ vals = ['Height', 'Weight', 'Age']
 
 # ! reduce dataset
 def Reduction(df):
-    df = df[(df.Sex == 'M') & 
-            (df.Height > 1) &
+    df = df[(df.Event == 'Athletics Men\'s 100 metres') |
+            (df.Event == 'Athletics Men\'s Long Jump') |
+            (df.Event == 'Athletics Men\'s Shot Put') |
+            (df.Event == 'Athletics Men\'s High Jump') |
+            (df.Event == 'Athletics Men\'s 400 metres') |
+            (df.Event == 'Athletics Men\'s 110 metres Hurdles') |
+            (df.Event == 'Athletics Men\'s Discus Throw') |
+            (df.Event == 'Athletics Men\'s Pole Vault') |
+            (df.Event == 'Athletics Men\'s Javelin Throw') |
+            (df.Event == 'Athletics Men\'s 1,500 metres')]
+    
+    df = df[(df.Height > 1) &
             (df.Age > 1) &
-            (df.Weight > 1) & 
+            (df.Weight > 1) &
+            (df.Year >= 1960)
+            ]
+    
+    return df
+
+
+def Reduction2(df):
+    df = df[(df.Height > 1) &
+            (df.Age > 1) &
+            (df.Weight > 1) &
             (df.Year >= 1960) &
-            (df.Sport == 'Athletics')
+            (df.Event == 'Athletics Men\'s Decathlon')
             ]
     
     return df
@@ -33,7 +53,7 @@ def AddTheese(df, name, medal= True, prev_med= True, div_avg= True, reduce= True
     
     # * reduce dataframe
     if reduce:
-        df = Reduction(df)
+        df = Reduction2(df)
         print('reduced')
     
     # * add diviation from average columns for given variables per year
@@ -45,4 +65,4 @@ def AddTheese(df, name, medal= True, prev_med= True, div_avg= True, reduce= True
     df.to_csv(name + '.csv')
 
 
-AddTheese(df, 'df_MPHWA_Athletics_3')
+AddTheese(df, 'dec_MPHWA')

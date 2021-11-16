@@ -7,10 +7,14 @@ Last accessed: 28/10/2021
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from collections import Counter
 
 # ! Get dataset
-filepath = 'df_MPHWA_Athletics_3.csv'
+filepath = 'dec_sep_MPHWA.csv'
 df = pd.read_csv(filepath)
+
+dec_path = 'dec_MPHWA.csv'
+dec_df = pd.read_csv(dec_path)
 
 # ! Functions that manipulate dataframes and csv files
 # * Import and reshapes X and Y files
@@ -53,8 +57,8 @@ def TestSampler(df, X_list, Y_list):
     df_0 = df[df.MedalEarned == 0]
     
     # Randomly sample test df_1 and df_0
-    df_1_test = df_1.sample(n = 150)
-    df_0_test = df_0.sample(n = 150)
+    df_1_test = df_1.sample(n = 100)
+    df_0_test = df_0.sample(n = 100)
     
     # Remove test samples from df_1 and df_0
     df = df.drop(df_1_test.index)
@@ -160,7 +164,7 @@ def Model(X, Y, learning_rate, iterations, cost_progress= False):
 
 # * Accuracy test
 def Accuracy(X, Y, W, B):
-    lin_func = np.dot(W.T, X) + B # linear function
+    lin_func = np.dot(W.T, X) + B # Linear function
     sig_func = Sigmoid(lin_func) # Sigmoid function
     
     sig_func = sig_func > 0.5 # Sets sig_func to one if > 0 or 0 if < 0
@@ -170,8 +174,17 @@ def Accuracy(X, Y, W, B):
     
     # Calculate accuracy
     acc = (1 - np.sum(np.absolute(sig_func - Y)) / Y.shape[1]) * 100
-
-    return acc
+    
+    # False positives and False negatives
+    # -1 er False negative og 1 er False positive
+    guesses = sig_func - Y
+    occurance = [[x, list(guesses[0]).count(x)] for x in set(list(guesses[0]))]
+    occurance_dic = {}
+    
+    for i in occurance:
+        occurance_dic[i[0]] = i[1]
+    
+    return acc, occurance_dic
 
 
 # ! The functions that run the model and report on the model
@@ -184,17 +197,17 @@ def RunModel(iterations, learning_rate, plot_print= False, cost_progress= False,
     #Test dataframes
     if test:
         Test(X_train, Y_train, X_validate, Y_validate)
-
+    
     W, B, cost_list = Model(X_train, Y_train, learning_rate, iterations, cost_progress)
     
-    acc = Accuracy(X_validate, Y_validate, W, B)
+    acc, occurance_dic = Accuracy(X_validate, Y_validate, W, B)
     
     if plot_print:
         print("Accuracy of the model is : ", round(acc, 2), "%")
         plt.plot(np.arange(iterations), cost_list)
         plt.show()
     
-    return W, B, acc
+    return W, B, acc, occurance_dic
 
 
 # * Print accuracy
@@ -208,6 +221,22 @@ def PrintAccReport(list_of_acc, times, name):
     print(f'Average {name} over {times} iterations is: ', round(acc_avg, 2), '%')
     print(f'Lowest {name} over {times} iterations is', round(acc_min, 2), '%')
     print(f'Highest {name} over {times} iterations is', round(acc_max, 2), '%')
+    print('')
+
+
+# * Print false negative reprot
+def FalseNegative(occurance_dic_list, name):
+    # False negative perrcentage
+    false_neg = 0
+    false_pos = 0
+    
+    for i, occ in enumerate(occurance_dic_list):
+        false_neg += occ[-1]
+        false_pos += occ[1]
+    
+    false_neg_p = false_neg / (false_neg + false_pos) * 100
+    
+    print(f'Percentage of False negatives in {name}: {round(false_neg_p, 2)}%')
 
 
 # * Run multiple iterations of the model
@@ -216,6 +245,7 @@ def RunMore(times, iterations, learning_rate, plot_print= False, test= False):
     B_list = []
     acc_list = []
     test_acc_list = []
+    occ_dic_list = []
     
     # Create test sample
     df_testless = TestSampler(df, X_list, Y_list)
@@ -223,42 +253,107 @@ def RunMore(times, iterations, learning_rate, plot_print= False, test= False):
     for i in range(times):
         # Make X_train, Y_train, X_validate, Y_validate
         TrainValidateImport(df_testless, X_list, Y_list)
-
+        
         # Run model
-        W, B, acc = RunModel(iterations, learning_rate, plot_print, test)
+        W, B, acc, occurance_dic = RunModel(iterations, learning_rate, plot_print, test)
         
         # Append parameters and accuracy to lists
         W_list.append(W)
         B_list.append(B)
         acc_list.append(acc)
+        occ_dic_list.append(occurance_dic)
         
         # Progress bar
         if len(acc_list) % 5 == 0:
             print(f'on iteration {len(acc_list)} now and still going strong!!!')
+    print('')
     
     # Import and reshape test data
     X_test, Y_test = ImportReshape('test')
+    test_occ_dic_list = []
     
     # Test parameters on test data
     for i in range(len(W_list)):
-        test_acc = Accuracy(X_test, Y_test, W_list[i], B_list[i])
+        test_acc, test_occ_dic = Accuracy(X_test, Y_test, W_list[i], B_list[i])
         test_acc_list.append(test_acc)
+        test_occ_dic_list.append(test_occ_dic)
     
-    # Print accuracy reports
-    PrintAccReport(acc_list, times, 'accuracy')
+    # Print accuracy reports and false negative reports
+    FalseNegative(occ_dic_list, 'validate')
+    PrintAccReport(acc_list, times, 'validate accuracy')
+    
+    FalseNegative(test_occ_dic_list, 'test')
     PrintAccReport(test_acc_list, times, 'test accuracy')
+    
+    return W_list, B_list
+
+
+# * Test parameters on decathlon athletes
+def Decathlon(df, W_list, B_list, times):
+    dec_acc_list = []
+    dec_occ_list = []
+    
+    # Reduce and split X and Y dataframes
+    X_dec = df[X_list]
+    Y_dec = df[Y_list]
+    
+    # Create csv files
+    X_dec.to_csv('X_dec.csv', index=False)
+    Y_dec.to_csv('Y_dec.csv', index=False)
+    
+    # Import and reshape dec data
+    X_dec, Y_dec = ImportReshape('dec')
+    
+    #Test parameters on dec
+    for i in range(len(W_list)):
+        dec_acc, dec_occ_dic = Accuracy(X_dec, Y_dec, W_list[i], B_list[i])
+        dec_acc_list.append(dec_acc)
+        dec_occ_list.append(dec_occ_dic)
+    
+    FalseNegative(dec_occ_list, 'Decathlon')
+    PrintAccReport(dec_acc_list, times, 'Decathlon accuracy')
+
+
+# * Test parameters on random decathlon athletes
+def DecathlonEven(df, W_list, B_list, times, dec_times=20):
+    dec_acc_list = []
+    
+    #Test parameters on dec
+    for i in range(len(W_list)):
+        for x in range(dec_times):
+            df_1, df_0 = EvenDF(dec_df)
+            df_list = [df_1, df_0]
+            df = pd.concat(df_list)
+            
+            # Reduce and split X and Y dataframes
+            X_dec = df[X_list]
+            Y_dec = df[Y_list]
+            
+            # Create csv files
+            X_dec.to_csv('X_dec.csv', index=False)
+            Y_dec.to_csv('Y_dec.csv', index=False)
+            
+            # Import and reshape dec data
+            X_dec, Y_dec = ImportReshape('dec')
+            
+            dec_acc, dec_occurance_dic = Accuracy(X_dec, Y_dec, W_list[i], B_list[i])
+            dec_acc_list.append(dec_acc)
+    
+    PrintAccReport(dec_acc_list, times, 'Decathlon accuracy')
 
 
 # ! Variable list for X and Y
 X_list = ['ID', 
-          'PreviousMedals', 
-          'Height_div_avg', 
-          'Weight_div_avg', 
-          'Age_div_avg'
-          ]
+        'PreviousMedals', 
+        'Height_div_avg', 
+        'Weight_div_avg', 
+        'Age_div_avg'
+        ]
 
 Y_list = ['ID', 'MedalEarned']
 
-#TestAndValidateImport(df, X_list, Y_list)
-#RunModel(iterations= 5000, learning_rate= 0.025, plot_print= True, cost_progress= True)
-RunMore(times = 50, iterations= 5000, learning_rate= 0.025)
+#TrainValidateImport(df, X_list, Y_list)
+#RunModel(iterations= 5000, learning_rate= 0.02, plot_print= True, cost_progress= True, test= True)
+W_list, B_list = RunMore(times = 50, iterations= 5000, learning_rate= 0.02)
+Decathlon(dec_df, W_list, B_list, times=50)
+#DecathlonEven(dec_df, W_list, B_list, times=50, dec_times=5)
