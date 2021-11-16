@@ -7,7 +7,9 @@ Last accessed: 28/10/2021
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from collections import Counter
+
+# ! Set seed and seed calling function
+rng = np.random.default_rng(12345)
 
 # ! Get dataset
 filepath = 'dec_sep_MPHWA.csv'
@@ -45,7 +47,7 @@ def EvenDF(df):
     df_0 = df[df.MedalEarned == 0]
     
     # Randomly sample df_0 to size of df_1
-    df_0 = df_0.sample(n = len(df_1))
+    df_0 = df_0.sample(n = len(df_1), random_state=rng.integers(1000))
     
     return df_1, df_0
 
@@ -57,8 +59,8 @@ def TestSampler(df, X_list, Y_list):
     df_0 = df[df.MedalEarned == 0]
     
     # Randomly sample test df_1 and df_0
-    df_1_test = df_1.sample(n = 100)
-    df_0_test = df_0.sample(n = 100)
+    df_1_test = df_1.sample(n = 100, random_state=rng.integers(1000))
+    df_0_test = df_0.sample(n = 100, random_state=rng.integers(1000))
     
     # Remove test samples from df_1 and df_0
     df = df.drop(df_1_test.index)
@@ -85,8 +87,8 @@ def TrainValidateImport(df, X_list, Y_list):
     df_1, df_0 = EvenDF(df)
 
     # Randomly sample validate df_1 and df_0
-    df_1_validate = df_1.sample(frac= 0.2)
-    df_0_validate = df_0.sample(frac= 0.2)
+    df_1_validate = df_1.sample(frac= 0.2, random_state=rng.integers(1000))
+    df_0_validate = df_0.sample(frac= 0.2, random_state=rng.integers(1000))
 
     # Remove validation samples from df_1 and df_0
     # The rest of df_1 and df_0 are training
@@ -121,7 +123,7 @@ def Test(X_train, Y_train, X_validate, Y_validate):
     print("Shape of X_test : ", X_validate.shape)
     print("Shape of Y_test : ", Y_validate.shape)
     print('')
-    
+
 
 # * Sigmoid function
 def Sigmoid(x):
@@ -314,34 +316,6 @@ def Decathlon(df, W_list, B_list, times):
     PrintAccReport(dec_acc_list, times, 'Decathlon accuracy')
 
 
-# * Test parameters on random decathlon athletes
-def DecathlonEven(df, W_list, B_list, times, dec_times=20):
-    dec_acc_list = []
-    
-    #Test parameters on dec
-    for i in range(len(W_list)):
-        for x in range(dec_times):
-            df_1, df_0 = EvenDF(dec_df)
-            df_list = [df_1, df_0]
-            df = pd.concat(df_list)
-            
-            # Reduce and split X and Y dataframes
-            X_dec = df[X_list]
-            Y_dec = df[Y_list]
-            
-            # Create csv files
-            X_dec.to_csv('X_dec.csv', index=False)
-            Y_dec.to_csv('Y_dec.csv', index=False)
-            
-            # Import and reshape dec data
-            X_dec, Y_dec = ImportReshape('dec')
-            
-            dec_acc, dec_occurance_dic = Accuracy(X_dec, Y_dec, W_list[i], B_list[i])
-            dec_acc_list.append(dec_acc)
-    
-    PrintAccReport(dec_acc_list, times, 'Decathlon accuracy')
-
-
 # ! Variable list for X and Y
 X_list = ['ID', 
         'PreviousMedals', 
@@ -356,4 +330,3 @@ Y_list = ['ID', 'MedalEarned']
 #RunModel(iterations= 5000, learning_rate= 0.02, plot_print= True, cost_progress= True, test= True)
 W_list, B_list = RunMore(times = 50, iterations= 5000, learning_rate= 0.02)
 Decathlon(dec_df, W_list, B_list, times=50)
-#DecathlonEven(dec_df, W_list, B_list, times=50, dec_times=5)
