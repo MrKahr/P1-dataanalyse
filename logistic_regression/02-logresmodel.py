@@ -19,12 +19,8 @@ dec_path = 'dec_MPHWA.csv'
 dec_df = pd.read_csv(dec_path)
 
 # ! Functions that manipulate dataframes and csv files
-# * Import and reshapes X and Y files
-def ImportReshape(switch):
-    # Import data as pandas dataframes
-    X = pd.read_csv(f'X_{switch}.csv')
-    Y = pd.read_csv(f'Y_{switch}.csv')
-    
+# * Reshapes X and Y files
+def Reshape(X, Y):
     # Drop id column from dataframes
     X = X.drop("ID", axis = 1)
     Y = Y.drop("ID", axis = 1)
@@ -74,45 +70,37 @@ def TestSampler(df, X_list, Y_list):
     X_test = df_test[X_list]
     Y_test = df_test[Y_list]
     
-    # Create X_test and Y_test csv
-    X_test.to_csv('X_test.csv', index=False)
-    Y_test.to_csv('Y_test.csv', index=False)
-    
-    return df_testless
+    return df_testless, X_test, Y_test
 
 
 # * Make the X and Y data frames
-def TrainValidateImport(df, X_list, Y_list):
+def TrainValidate(df, X_list, Y_list):
     # Randomly sample df_0 to size of df_1
     df_1, df_0 = EvenDF(df)
-
+    
     # Randomly sample validate df_1 and df_0
     df_1_validate = df_1.sample(frac= 0.2, random_state=rng.integers(1000))
     df_0_validate = df_0.sample(frac= 0.2, random_state=rng.integers(1000))
-
+    
     # Remove validation samples from df_1 and df_0
     # The rest of df_1 and df_0 are training
     df_1_train = df_1.drop(df_1_validate.index)
     df_0_train = df_0.drop(df_0_validate.index)
-
+    
     # concatinate training and validation
     df_validate_list = [df_1_validate, df_0_validate]
     df_train_list =    [df_1_train, df_0_train]
     
     df_validate = pd.concat(df_validate_list)
     df_train =    pd.concat(df_train_list)
-
+    
     # Reduce and split X and Y dataframes
     X_validate = df_validate[X_list]
     Y_validate = df_validate[Y_list]
     X_train =    df_train[X_list]
     Y_train =    df_train[Y_list]
     
-    # Create csv files
-    X_validate.to_csv('X_validate.csv', index=False)
-    Y_validate.to_csv('Y_validate.csv', index=False)
-    X_train.to_csv('X_train.csv', index=False)
-    Y_train.to_csv('Y_train.csv', index=False)
+    return X_train, Y_train, X_validate, Y_validate
 
 
 # ! The functions for the logistic regression model
@@ -191,19 +179,25 @@ def Accuracy(X, Y, W, B):
 
 # ! The functions that run the model and report on the model
 # * Run model
-def RunModel(iterations, learning_rate, plot_print= False, cost_progress= False, test=False):
+def RunModel(df_testless, iterations, learning_rate, plot_print= False, cost_progress= False, test=False):
+    # Make X_train, Y_train, X_validate, Y_validate
+    X_train, Y_train, X_validate, Y_validate = TrainValidate(df_testless, X_list, Y_list)
+    
     # Import and reshape training and validation dataframes
-    X_train, Y_train = ImportReshape('train')
-    X_validate, Y_validate = ImportReshape('validate')
+    X_train, Y_train = Reshape(X_train, Y_train)
+    X_validate, Y_validate = Reshape(X_validate, Y_validate)
     
     #Test dataframes
     if test:
         Test(X_train, Y_train, X_validate, Y_validate)
     
+    # Call Model function
     W, B, cost_list = Model(X_train, Y_train, learning_rate, iterations, cost_progress)
     
+    # Call Accuracy function
     acc, occurance_dic = Accuracy(X_validate, Y_validate, W, B)
     
+    # Print accuracy and plot cost value over iterations
     if plot_print:
         print("Accuracy of the model is : ", round(acc, 2), "%")
         plt.plot(np.arange(iterations), cost_list)
@@ -213,31 +207,32 @@ def RunModel(iterations, learning_rate, plot_print= False, cost_progress= False,
 
 
 # * Print accuracy
-def PrintAccReport(list_of_acc, times, name):
+def PrintAccReport(list_of_acc, name):
     # Calculate average, min and max accuracy
     acc_avg = sum(list_of_acc) / len(list_of_acc)
     acc_min = min(list_of_acc)
     acc_max = max(list_of_acc)
     
     # Print average, min and max accuracy
-    print(f'Average {name} over {times} iterations is: ', round(acc_avg, 2), '%')
-    print(f'Lowest {name} over {times} iterations is', round(acc_min, 2), '%')
-    print(f'Highest {name} over {times} iterations is', round(acc_max, 2), '%')
-    print('')
+    print(f'{name} results: avg {round(acc_avg, 2)}% ', 
+                    f'min {round(acc_min, 2)}% ', 
+                    f'max {round(acc_max, 2)}% ')
 
 
 # * Print false negative reprot
 def FalseNegative(occurance_dic_list, name):
-    # False negative perrcentage
     false_neg = 0
     false_pos = 0
     
+    # Sum up all occurances of False negatives and positives
     for i, occ in enumerate(occurance_dic_list):
         false_neg += occ[-1]
         false_pos += occ[1]
     
+    # False negative perrcentage
     false_neg_p = false_neg / (false_neg + false_pos) * 100
     
+    print('')
     print(f'Percentage of False negatives in {name}: {round(false_neg_p, 2)}%')
 
 
@@ -250,16 +245,13 @@ def RunMore(times, iterations, learning_rate, plot_print= False, test= False):
     occ_dic_list = []
     
     # Create test sample
-    df_testless = TestSampler(df, X_list, Y_list)
+    df_testless, X_test, Y_test = TestSampler(df, X_list, Y_list)
     
     for i in range(times):
-        # Make X_train, Y_train, X_validate, Y_validate
-        TrainValidateImport(df_testless, X_list, Y_list)
-        
         # Run model
-        W, B, acc, occurance_dic = RunModel(iterations, learning_rate, plot_print, test)
+        W, B, acc, occurance_dic = RunModel(df_testless, iterations, learning_rate, plot_print, test)
         
-        # Append parameters and accuracy to lists
+        # Append parameters, accuracy and occurances to lists
         W_list.append(W)
         B_list.append(B)
         acc_list.append(acc)
@@ -267,11 +259,10 @@ def RunMore(times, iterations, learning_rate, plot_print= False, test= False):
         
         # Progress bar
         if len(acc_list) % 5 == 0:
-            print(f'on iteration {len(acc_list)} now and still going strong!!!')
-    print('')
+            print(f'{times - len(acc_list)} runs left.')
     
     # Import and reshape test data
-    X_test, Y_test = ImportReshape('test')
+    X_test, Y_test = Reshape(X_test, Y_test)
     test_occ_dic_list = []
     
     # Test parameters on test data
@@ -281,17 +272,17 @@ def RunMore(times, iterations, learning_rate, plot_print= False, test= False):
         test_occ_dic_list.append(test_occ_dic)
     
     # Print accuracy reports and false negative reports
-    FalseNegative(occ_dic_list, 'validate')
-    PrintAccReport(acc_list, times, 'validate accuracy')
+    FalseNegative(occ_dic_list, 'Validate')
+    PrintAccReport(acc_list, 'Validate')
     
-    FalseNegative(test_occ_dic_list, 'test')
-    PrintAccReport(test_acc_list, times, 'test accuracy')
+    FalseNegative(test_occ_dic_list, 'Test')
+    PrintAccReport(test_acc_list, 'Test')
     
     return W_list, B_list
 
 
 # * Test parameters on decathlon athletes
-def Decathlon(df, W_list, B_list, times):
+def Decathlon(df, W_list, B_list):
     dec_acc_list = []
     dec_occ_list = []
     
@@ -299,21 +290,18 @@ def Decathlon(df, W_list, B_list, times):
     X_dec = df[X_list]
     Y_dec = df[Y_list]
     
-    # Create csv files
-    X_dec.to_csv('X_dec.csv', index=False)
-    Y_dec.to_csv('Y_dec.csv', index=False)
-    
     # Import and reshape dec data
-    X_dec, Y_dec = ImportReshape('dec')
+    X_dec, Y_dec = Reshape(X_dec, Y_dec)
     
-    #Test parameters on dec
+    # Test parameters on dec
     for i in range(len(W_list)):
         dec_acc, dec_occ_dic = Accuracy(X_dec, Y_dec, W_list[i], B_list[i])
         dec_acc_list.append(dec_acc)
         dec_occ_list.append(dec_occ_dic)
     
+    # Print reports
     FalseNegative(dec_occ_list, 'Decathlon')
-    PrintAccReport(dec_acc_list, times, 'Decathlon accuracy')
+    PrintAccReport(dec_acc_list, 'Decathlon')
 
 
 # ! Variable list for X and Y
@@ -329,4 +317,4 @@ Y_list = ['ID', 'MedalEarned']
 #TrainValidateImport(df, X_list, Y_list)
 #RunModel(iterations= 5000, learning_rate= 0.02, plot_print= True, cost_progress= True, test= True)
 W_list, B_list = RunMore(times = 50, iterations= 5000, learning_rate= 0.02)
-Decathlon(dec_df, W_list, B_list, times=50)
+Decathlon(dec_df, W_list, B_list)

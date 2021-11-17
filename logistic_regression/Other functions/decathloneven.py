@@ -27,4 +27,23 @@ def DecathlonEven(df, W_list, B_list, times, dec_times=20):
             dec_acc_list.append(dec_acc)
     
     PrintAccReport(dec_acc_list, times, 'Decathlon accuracy')
+
+def ImportReshape(switch):
+    # Import data as pandas dataframes
+    X = pd.read_csv(f'X_{switch}.csv')
+    Y = pd.read_csv(f'Y_{switch}.csv')
+    
+    # Drop id column from dataframes
+    X = X.drop("ID", axis = 1)
+    Y = Y.drop("ID", axis = 1)
+    
+    # Define dataframes as variables
+    X = X.values
+    Y = Y.values
+    
+    # Reshape dataframes to appropriate shape
+    X = X.T
+    Y = Y.reshape(1, X.shape[1])
+    
+    return X, Y
 '''
