@@ -14,9 +14,11 @@ rng = np.random.default_rng(12345)
 # ! Get dataset
 filepath = 'dec_sep_MPHWA.csv'
 df = pd.read_csv(filepath)
+df= df.reset_index()
 
 dec_path = 'dec_MPHWA.csv'
 dec_df = pd.read_csv(dec_path)
+dec_df = dec_df.reset_index()
 
 # ! Functions that manipulate dataframes and csv files
 # * Reshapes X and Y files
@@ -157,7 +159,7 @@ def Accuracy(X, Y, W, B):
     lin_func = np.dot(W.T, X) + B # Linear function
     sig_func = Sigmoid(lin_func) # Sigmoid function
     
-    sig_func = sig_func > 0.5 # Sets sig_func to one if > 0 or 0 if < 0
+    sig_func = sig_func > 0.55 # Sets sig_func to one if > 0 or 0 if < 0
     
     # Make sig_func array with data type int64
     sig_func = np.array(sig_func, dtype = 'int64') 
@@ -283,6 +285,7 @@ def RunMore(times, iterations, learning_rate, plot_print= False, test= False):
 
 # * Test parameters on decathlon athletes
 def Decathlon(df, W_list, B_list):
+    print(W_list[1])
     dec_acc_list = []
     dec_occ_list = []
     

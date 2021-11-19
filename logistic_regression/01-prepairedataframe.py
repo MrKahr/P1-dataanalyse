@@ -26,6 +26,8 @@ def Reduction(df):
             (df.Year >= 1960)
             ]
     
+    #df = df.reset_index()
+    
     return df
 
 
@@ -37,10 +39,12 @@ def Reduction2(df):
             (df.Event == 'Athletics Men\'s Decathlon')
             ]
     
+    #df = df.reset_index()
+    
     return df
 
 
-def AddTheese(df, name, medal= True, prev_med= True, div_avg= True, reduce= True):
+def AddTheese(df, name, medal= True, prev_med= True, div_avg= True, div_avg_event= False, reduce= True):
     # * add MedalEarned column to dataframe
     if medal:
         df = add.MedalEarned(df)
@@ -53,7 +57,7 @@ def AddTheese(df, name, medal= True, prev_med= True, div_avg= True, reduce= True
     
     # * reduce dataframe
     if reduce:
-        df = Reduction2(df)
+        df = Reduction(df)
         print('reduced')
     
     # * add diviation from average columns for given variables per year
@@ -61,8 +65,13 @@ def AddTheese(df, name, medal= True, prev_med= True, div_avg= True, reduce= True
         df = add.DeviationAverage(df, vals)
         print('Added div_avg')
     
+    # * add diviation from average columns for given variables per year per event
+    if div_avg_event:
+        df = add.DeviationAverageEvent(df, vals)
+        print('Added div_avg_event')
+    
     # * saves df as csv
     df.to_csv(name + '.csv')
 
 
-AddTheese(df, 'dec_MPHWA')
+AddTheese(df, 'dec_sep_MPHWAE', div_avg= False, div_avg_event= True)
