@@ -167,15 +167,14 @@ def Accuracy(X, Y, W, B):
     # Calculate accuracy
     acc = (1 - np.sum(np.absolute(sig_func - Y)) / Y.shape[1]) * 100
     
-    # False positives and False negatives
-    # -1 er False negative og 1 er False positive
-    guesses = sig_func - Y
+    # 1 = True Pos, 0 = True Neg, -1 = False Neg, 2 = False Pos 
+    guesses = sig_func * 2 - Y
     occurance = [[x, list(guesses[0]).count(x)] for x in set(list(guesses[0]))]
     occurance_dic = {}
     
     for i in occurance:
+        # Assign value to keys e.g. TP = 22 
         occurance_dic[i[0]] = i[1]
-    
     return acc, occurance_dic
 
 
@@ -208,6 +207,10 @@ def RunModel(df_testless, iterations, learning_rate, plot_print= False, cost_pro
     return W, B, acc, occurance_dic
 
 
+def percent(x):
+    return x * 100
+
+
 # * Print accuracy
 def PrintAccReport(list_of_acc, name):
     # Calculate average, min and max accuracy
@@ -222,20 +225,35 @@ def PrintAccReport(list_of_acc, name):
 
 
 # * Print false negative reprot
-def FalseNegative(occurance_dic_list, name):
-    false_neg = 0
-    false_pos = 0
+def PredRate(occurance_dic_list, name):
+    tp,fp,tn,fn = 0,0,0,0 
     
     # Sum up all occurances of False negatives and positives
+    # 1 = True Pos, 0 = True Neg, -1 = False Neg, 2 = False Pos 
     for i, occ in enumerate(occurance_dic_list):
-        false_neg += occ[-1]
-        false_pos += occ[1]
+        tp += occ[1]
+        tn += occ[0]
+        fn += occ[-1]
+        fp += occ[2]
     
-    # False negative perrcentage
-    false_neg_p = false_neg / (false_neg + false_pos) * 100
+    # False Positive - type 1 error
+    fpr = fp / (fp + tn) 
+    # False negative rate - type 2 error 
+    fnr = fn / (tp + fn)
+    # True negative rate - specificity 
+    tnr = tn / (tn + fp) 
+    # False discovery rate 
+    fdr = fp / (tp + fp) 
+    # True positive rate - sensitivity 
+    tpr = tp / (tp + fn) 
+    # Positive predictive value - precision 
+    ppv = tp / (tp + fp) 
+    # Accuracy 
+    acc = (tp + tn) / (tp + fp + fn + tn) 
+    
     
     print('')
-    print(f'Percentage of False negatives in {name}: {round(false_neg_p, 2)}%')
+    # print(f'Percentage of False negatives in {name}: {round(false_neg_p, 2)}%')
 
 
 # * Run multiple iterations of the model
@@ -274,10 +292,10 @@ def RunMore(times, iterations, learning_rate, plot_print= False, test= False):
         test_occ_dic_list.append(test_occ_dic)
     
     # Print accuracy reports and false negative reports
-    FalseNegative(occ_dic_list, 'Validate')
+    PredRate(occ_dic_list, 'Validate')
     PrintAccReport(acc_list, 'Validate')
     
-    FalseNegative(test_occ_dic_list, 'Test')
+    PredRate(test_occ_dic_list, 'Test')
     PrintAccReport(test_acc_list, 'Test')
     
     return W_list, B_list
@@ -285,7 +303,6 @@ def RunMore(times, iterations, learning_rate, plot_print= False, test= False):
 
 # * Test parameters on decathlon athletes
 def Decathlon(df, W_list, B_list):
-    print(W_list[1])
     dec_acc_list = []
     dec_occ_list = []
     
@@ -303,7 +320,7 @@ def Decathlon(df, W_list, B_list):
         dec_occ_list.append(dec_occ_dic)
     
     # Print reports
-    FalseNegative(dec_occ_list, 'Decathlon')
+    PredRate(dec_occ_list, 'Decathlon')
     PrintAccReport(dec_acc_list, 'Decathlon')
 
 
@@ -317,7 +334,7 @@ X_list = ['ID',
 
 Y_list = ['ID', 'MedalEarned']
 
-#TrainValidateImport(df, X_list, Y_list)
-#RunModel(iterations= 5000, learning_rate= 0.02, plot_print= True, cost_progress= True, test= True)
+# TrainValidate(df, X_list, Y_list)
+# RunModel(df, iterations= 5000, learning_rate= 0.02, plot_print= True, cost_progress= True, test= True)
 W_list, B_list = RunMore(times = 50, iterations= 5000, learning_rate= 0.02)
 Decathlon(dec_df, W_list, B_list)
