@@ -154,12 +154,22 @@ def Model(X, Y, learning_rate, iterations, cost_progress= False):
     return W, B, cost_list
 
 
+def AltClassify(df, sf):
+    print(df.info())
+    sf_T = sf.T
+    sf_pd = pd.DataFrame(sf_T, columns= ['Prediction'])
+    print(sf_pd.info())
+    df_sf = pd.concat([df, sf_pd], axis= 1)
+    print(df_sf.info())
+    return
+
+
 # * Accuracy test
 def Accuracy(X, Y, W, B):
     lin_func = np.dot(W.T, X) + B # Linear function
     sig_func = Sigmoid(lin_func) # Sigmoid function
-    
-    sig_func = sig_func > 0.55 # Sets sig_func to one if > 0 or 0 if < 0
+    AltClassify(df, sig_func)
+    sig_func = sig_func > 0.5 # Sets sig_func to one if > 0 or 0 if < 0
     
     # Make sig_func array with data type int64
     sig_func = np.array(sig_func, dtype = 'int64') 
@@ -252,7 +262,8 @@ def PredRate(occurance_dic_list, name):
     acc = (tp + tn) / (tp + fp + fn + tn) 
     
     
-    print('')
+    print(fnr)
+    print(fpr)
     # print(f'Percentage of False negatives in {name}: {round(false_neg_p, 2)}%')
 
 
@@ -334,7 +345,7 @@ X_list = ['ID',
 
 Y_list = ['ID', 'MedalEarned']
 
-# TrainValidate(df, X_list, Y_list)
-# RunModel(df, iterations= 5000, learning_rate= 0.02, plot_print= True, cost_progress= True, test= True)
-W_list, B_list = RunMore(times = 50, iterations= 5000, learning_rate= 0.02)
-Decathlon(dec_df, W_list, B_list)
+TrainValidate(df, X_list, Y_list)
+RunModel(df, iterations= 5000, learning_rate= 0.02, plot_print= True, cost_progress= True, test= True)
+#W_list, B_list = RunMore(times = 50, iterations= 5000, learning_rate= 0.02)
+#Decathlon(dec_df, W_list, B_list)
