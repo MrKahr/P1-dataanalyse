@@ -1,17 +1,19 @@
 import pandas as pd
-import Add_columns_to_df as add
+import addcolumns as add
 
 # ! Get dataset
-filepath = 'athlete_events.csv'
+filepath = 'dec_sep_MPHWA.csv'
 df = pd.read_csv(filepath)
+
+vals = ['Height', 'Weight', 'Age']
 
 #listdf = [df['Sport'] for x in df]
 #print(listdf)
 
-df_sliced_dict = {}
+#df_sliced_dict = {}
 
-for event in df['Event'].unique():
-    df_sliced_dict[event] = df[df['Event'] == event]
+#for event in df['Event'].unique():
+#    df_sliced_dict[event] = df[df['Event'] == event]
 
 #print(df_sliced_dict)
 
@@ -35,3 +37,8 @@ def div_from_avg_per_year(df, vals):
             df.at[i, f'{val}_div_avg'] = div_avg
         
     return df
+
+
+x = add.DeviationAverageEvent(df, vals)
+
+print(x)

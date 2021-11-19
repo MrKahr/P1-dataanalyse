@@ -1,10 +1,11 @@
 import pandas as pd
 import numpy as np
+#import copy
 
 
 # ! Find diviation from average for given variable and add column to df
 # TODO add so that it can differentiate between events
-def div_from_avg_per_year(df, vals):
+def DeviationAverage(df, vals):
     for i in range(len(vals)):
         val = vals[i]
         
@@ -22,17 +23,56 @@ def div_from_avg_per_year(df, vals):
             
             # Add diviation to new column in df
             df.at[i, f'{val}_div_avg'] = div_avg
+    
+    return df
+
+
+# ! Find diviation from average per year per event for given variable and add column to df
+def DeviationAverageEvent(df, vals):
+    df = df.reset_index()
+    print(df.info())
+    for i in range(len(vals)):
+        print(1)        
+        val = vals[i]
+        df_x = pd.DataFrame(index= range(len(df)), columns= [f'{val}_div_avg'])
+        print(2)
         
+        # Make df of average values for given variable per year
+        df_g = df.groupby(['Year', 'Event'])[val].mean()
+        print(3)
+        df_g_r = df_g.reset_index()
+        print(4)
+        
+        # iterate over given df
+        for i, row in df.iterrows():
+            df_c = df_g_r[(df_g_r.Year == row.Year) & (df_g_r.Event == row.Event)]
+            df_c = df_c.reset_index()
+
+            avg_val = df_c.loc[0, val]
+            #print(avg_val)
+            
+            # Calculate diviation from average for given year
+            div_avg = round(row[val] - avg_val, 2)
+            
+            #print(i)
+            
+            # Add diviation to new column in df
+            df_x.at[i, f'{val}_div_avg'] = div_avg
+        
+        print(5)
+        df = pd.concat([df,df_x], axis= 1)
+        print(df.info())
+    
     return df
 
 
 # ! Add MedalEarned to df
-def medal_earned(df):
+def MedalEarned(df):
     # Locate and define medals
     conditions = [(df['Medal'] == 'Gold'),
-                  (df['Medal'] == 'Silver'),
-                  (df['Medal'] == 'Bronze'),
-                  (df['Medal'] == 'NA')]
+                    (df['Medal'] == 'Silver'),
+                    (df['Medal'] == 'Bronze'),
+                    (df['Medal'] == 'NA')]
 
     # Define values for medals
     values = [1,1,1,0]
@@ -42,8 +82,9 @@ def medal_earned(df):
     
     return df
 
+
 # ! add previous medals earned to observation
-def previous_medals(df):
+def PreviousMedals(df):
     # * Create empty dict
     ID_medals = {}
     
@@ -51,7 +92,6 @@ def previous_medals(df):
     df_prev_med = pd.DataFrame(index= range(len(df)), columns= ['PreviousMedals'])
     
     # * sort by ID then by year
-    df = df.sort_values(by= 'MedalEarned', ascending= False)
     df = df.sort_values(by= 'ID', ascending= True)
     df = df.sort_values(by= 'Year', ascending= True)
 
@@ -62,6 +102,7 @@ def previous_medals(df):
                 df_prev_med.at[i, 'PreviousMedals'] = ID_medals[row['ID']]
                 
                 ID_medals[row['ID']] += 1
+            
             else:
                 ID_medals[row['ID']] = 1
                 
