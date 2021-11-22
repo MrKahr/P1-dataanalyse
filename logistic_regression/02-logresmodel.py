@@ -9,7 +9,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # ! Set seed and seed calling function
-rng = np.random.default_rng(12345)
+rng = np.random.default_rng(1)
 
 # ! Get dataset
 filepath = 'dec_sep_MPHWA.csv'
@@ -154,21 +154,52 @@ def Model(X, Y, learning_rate, iterations, cost_progress= False):
     return W, B, cost_list
 
 
-def AltClassify(df, sf):
-    print(df.info())
+def AltClassify(df, X, Y, W, B, wg):
+    # Calculate predictions
+    lf = np.dot(W.T, X) + B # Linear function
+    sf = Sigmoid(lf) # Sigmoid function
     sf_T = sf.T
+    
+    # Add predictions to df
     sf_pd = pd.DataFrame(sf_T, columns= ['Prediction'])
-    print(sf_pd.info())
     df_sf = pd.concat([df, sf_pd], axis= 1)
-    print(df_sf.info())
-    return
+    
+    # Find highest predictions for each year
+    df1 = df_sf.groupby(['Year']).apply(lambda x: x.sort_values(['Prediction'], ascending= False))
+    df2 = df1.reset_index(drop= True)
+    df3 = df2.groupby('Year').head(wg)
+    index_list = df3['index'].tolist()
+    
+    # Set highest predictions to 1 and rest to 0
+    for i in range(len(df_sf)):
+        if i in index_list:
+            df_sf.at[i, 'Prediction'] = 1
+        else:
+            df_sf.at[i, 'Prediction'] = 0
+    
+    sf_T_new = df_sf['Prediction'].to_numpy()
+    sf_int = np.array(sf_T_new, dtype = 'int64')
+    
+    # Calculate accuracy
+    acc = (1 - np.sum(np.absolute(sf_int - Y)) / Y.shape[1]) * 100
+    
+    # 1 = True Pos, 0 = True Neg, -1 = False Neg, 2 = False Pos 
+    guesses = sf_int.T * 2 - Y
+    occurance = [[x, list(guesses[0]).count(x)] for x in set(list(guesses[0]))]
+    occurance_dic = {}
+    
+    for i in occurance:
+        # Assign value to keys e.g. TP = 22 
+        occurance_dic[i[0]] = i[1]
+    
+    return acc, occurance_dic
 
 
 # * Accuracy test
 def Accuracy(X, Y, W, B):
     lin_func = np.dot(W.T, X) + B # Linear function
     sig_func = Sigmoid(lin_func) # Sigmoid function
-    AltClassify(df, sig_func)
+    
     sig_func = sig_func > 0.5 # Sets sig_func to one if > 0 or 0 if < 0
     
     # Make sig_func array with data type int64
@@ -185,6 +216,7 @@ def Accuracy(X, Y, W, B):
     for i in occurance:
         # Assign value to keys e.g. TP = 22 
         occurance_dic[i[0]] = i[1]
+    
     return acc, occurance_dic
 
 
@@ -217,10 +249,6 @@ def RunModel(df_testless, iterations, learning_rate, plot_print= False, cost_pro
     return W, B, acc, occurance_dic
 
 
-def percent(x):
-    return x * 100
-
-
 # * Print accuracy
 def PrintAccReport(list_of_acc, name):
     # Calculate average, min and max accuracy
@@ -232,6 +260,10 @@ def PrintAccReport(list_of_acc, name):
     print(f'{name} results: avg {round(acc_avg, 2)}% ', 
                     f'min {round(acc_min, 2)}% ', 
                     f'max {round(acc_max, 2)}% ')
+
+
+def round_prcnt(x):
+    return f'{round((x * 100), 2)}%'
 
 
 # * Print false negative reprot
@@ -261,10 +293,10 @@ def PredRate(occurance_dic_list, name):
     # Accuracy 
     acc = (tp + tn) / (tp + fp + fn + tn) 
     
-    
-    print(fnr)
-    print(fpr)
-    # print(f'Percentage of False negatives in {name}: {round(false_neg_p, 2)}%')
+    print('TPR: ', round_prcnt(tpr))
+    print('FPR: ', round_prcnt(fpr))
+    print('TNR: ', round_prcnt(tnr))
+    print('acc: ', round_prcnt(acc))
 
 
 # * Run multiple iterations of the model
@@ -289,8 +321,8 @@ def RunMore(times, iterations, learning_rate, plot_print= False, test= False):
         occ_dic_list.append(occurance_dic)
         
         # Progress bar
-        if len(acc_list) % 5 == 0:
-            print(f'{times - len(acc_list)} runs left.')
+        #if len(acc_list) % 5 == 0:
+        #    print(f'{times - len(acc_list)} runs left.')
     
     # Import and reshape test data
     X_test, Y_test = Reshape(X_test, Y_test)
@@ -303,19 +335,23 @@ def RunMore(times, iterations, learning_rate, plot_print= False, test= False):
         test_occ_dic_list.append(test_occ_dic)
     
     # Print accuracy reports and false negative reports
-    PredRate(occ_dic_list, 'Validate')
+    #PredRate(occ_dic_list, 'Validate')
     PrintAccReport(acc_list, 'Validate')
     
-    PredRate(test_occ_dic_list, 'Test')
+    #PredRate(test_occ_dic_list, 'Test')
     PrintAccReport(test_acc_list, 'Test')
+    print('')
     
     return W_list, B_list
 
 
 # * Test parameters on decathlon athletes
 def Decathlon(df, W_list, B_list):
+    wg = 6
     dec_acc_list = []
     dec_occ_list = []
+    dec_alt_acc_list = []
+    dec_alt_occ_list = []
     
     # Reduce and split X and Y dataframes
     X_dec = df[X_list]
@@ -326,13 +362,37 @@ def Decathlon(df, W_list, B_list):
     
     # Test parameters on dec
     for i in range(len(W_list)):
+        dec_alt_acc, dec_alt_occ_dic = AltClassify(dec_df, X_dec, Y_dec, W_list[i], B_list[i], wg)
         dec_acc, dec_occ_dic = Accuracy(X_dec, Y_dec, W_list[i], B_list[i])
+        
+        dec_alt_acc_list.append(dec_alt_acc)
+        dec_alt_occ_list.append(dec_alt_occ_dic)
         dec_acc_list.append(dec_acc)
         dec_occ_list.append(dec_occ_dic)
     
     # Print reports
     PredRate(dec_occ_list, 'Decathlon')
     PrintAccReport(dec_acc_list, 'Decathlon')
+    
+    PredRate(dec_alt_occ_list, 'Decathlon alt')
+    PrintAccReport(dec_alt_acc_list, 'Decathlon alt')
+
+
+def RocCurve(switch):
+    tpr_l = []
+    fpr_l = []
+    
+    # Run iterations of model and find tpr/fpr
+    if switch:
+        
+        W_list, B_list = RunMore(times= 50, iterations= 5000, learning_rate= 0.02, cop= 0.5)
+        dol, doal = Decathlon(dec_df, W_list, B_list, wg= 6, cop= 0.5)
+        tpr, fpr = PredRate(dol, '')
+        print(tpr, fpr)
+    else:
+        pass
+    
+    return
 
 
 # ! Variable list for X and Y
@@ -345,7 +405,6 @@ X_list = ['ID',
 
 Y_list = ['ID', 'MedalEarned']
 
-TrainValidate(df, X_list, Y_list)
-RunModel(df, iterations= 5000, learning_rate= 0.02, plot_print= True, cost_progress= True, test= True)
-#W_list, B_list = RunMore(times = 50, iterations= 5000, learning_rate= 0.02)
-#Decathlon(dec_df, W_list, B_list)
+#RunModel(df, iterations= 5000, learning_rate= 0.02, plot_print= True, cost_progress= True)
+W_list, B_list = RunMore(times = 50, iterations= 5000, learning_rate= 0.02)
+Decathlon(dec_df, W_list, B_list)

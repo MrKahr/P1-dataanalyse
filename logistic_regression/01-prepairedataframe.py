@@ -26,8 +26,6 @@ def Reduction(df):
             (df.Year >= 1960)
             ]
     
-    #df = df.reset_index()
-    
     return df
 
 
@@ -38,8 +36,6 @@ def Reduction2(df):
             (df.Year >= 1960) &
             (df.Event == 'Athletics Men\'s Decathlon')
             ]
-    
-    #df = df.reset_index()
     
     return df
 
