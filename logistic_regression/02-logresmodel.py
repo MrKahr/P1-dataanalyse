@@ -200,7 +200,7 @@ def Accuracy(X, Y, W, B):
     lin_func = np.dot(W.T, X) + B # Linear function
     sig_func = Sigmoid(lin_func) # Sigmoid function
     
-    sig_func = sig_func > 0.42 # Sets sig_func to one if > 0 or 0 if < 0
+    sig_func = sig_func > 0.47 # Sets sig_func to one if > 0 or 0 if < 0
     
     # Make sig_func array with data type int64
     sig_func = np.array(sig_func, dtype = 'int64') 
@@ -347,7 +347,7 @@ def RunMore(times, iterations, learning_rate, plot_print= False, test= False):
 
 # * Test parameters on decathlon athletes
 def Decathlon(df, W_list, B_list):
-    wg = 6
+    wg = 8
     dec_acc_list = []
     dec_occ_list = []
     dec_alt_acc_list = []
