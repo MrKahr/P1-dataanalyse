@@ -10,15 +10,6 @@ import pandas as pd
 # ! Set seed and seed calling function
 rng = np.random.default_rng(1)
 
-# ! Get dataset
-filepath = 'dec_sep_MPHWA.csv'
-df = pd.read_csv(filepath)
-df= df.reset_index()
-
-dec_path = 'dec_MPHWA.csv'
-dec_df = pd.read_csv(dec_path)
-dec_df = dec_df.reset_index()
-
 
 # ! Functions that manipulate dataframes and csv files
 # * Reshapes X and Y files
@@ -118,9 +109,9 @@ def Model(X, Y, l_rate, iterations):
 
 # ! The functions that run the model
 # * Run model
-def RunModel(df_testless, iterations, l_rate, X_list, Y_list):
+def RunModel(df, iterations, l_rate, X_list, Y_list):
     # Make X_train, Y_train, X_validate, Y_validate
-    X_train, Y_train, X_validate, Y_validate = TrainValidate(df_testless, X_list, Y_list)
+    X_train, Y_train, X_validate, Y_validate = TrainValidate(df, X_list, Y_list)
     
     # Import and reshape training and validation dataframes
     X_train, Y_train = Reshape(X_train, Y_train)
@@ -133,7 +124,7 @@ def RunModel(df_testless, iterations, l_rate, X_list, Y_list):
 
 
 # * Run multiple iterations of the model
-def RunMore(times, iterations, l_rate, X_list, Y_list):
+def RunMore(df, times, iterations, l_rate, X_list, Y_list):
     W_list = []
     B_list = []
     
