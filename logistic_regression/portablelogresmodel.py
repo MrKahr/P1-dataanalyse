@@ -124,7 +124,7 @@ def RunModel(df, iterations, l_rate, X_list, Y_list):
 
 
 # * Run multiple iterations of the model
-def RunMore(df, times, iterations, l_rate, X_list, Y_list):
+def RunMore(df, X_list, Y_list, times, iterations, l_rate):
     W_list = []
     B_list = []
     
