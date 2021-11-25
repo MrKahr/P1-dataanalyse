@@ -1,10 +1,8 @@
 import pandas as pd
 import numpy as np
-#import copy
 
 
 # ! Find diviation from average for given variable and add column to df
-# TODO add so that it can differentiate between events
 def DeviationAverage(df, vals):
     for i in range(len(vals)):
         val = vals[i]
@@ -13,7 +11,7 @@ def DeviationAverage(df, vals):
         df_g = df.groupby(['Year'])[val].mean()
         df_g_r = df_g.reset_index()
         df_g_s = df_g_r.set_index('Year')
-
+        
         # iterate over given df
         for i, row in df.iterrows():
             # Locate average value for given year
@@ -47,7 +45,7 @@ def DeviationAverageEvent(df, vals):
         for i, row in df.iterrows():
             df_c = df_g_r[(df_g_r.Year == row.Year) & (df_g_r.Event == row.Event)]
             df_c = df_c.reset_index()
-
+            
             avg_val = df_c.loc[0, val]
             #print(avg_val)
             
@@ -73,17 +71,17 @@ def MedalEarned(df):
                     (df['Medal'] == 'Silver'),
                     (df['Medal'] == 'Bronze'),
                     (df['Medal'] == 'NA')]
-
+    
     # Define values for medals
     values = [1,1,1,0]
-
+    
     # Add MedalEarned column with defined value to observations
     df['MedalEarned'] = np.select(conditions,values)
     
     return df
 
 
-# ! add previous medals earned to observation
+# ! Add previous medals earned to observation
 def PreviousMedals(df):
     # * Create empty dict
     ID_medals = {}
@@ -94,7 +92,7 @@ def PreviousMedals(df):
     # * sort by ID then by year
     df = df.sort_values(by= 'ID', ascending= True)
     df = df.sort_values(by= 'Year', ascending= True)
-
+    
     # * iterate through sorted df and add previous medals to athlete
     for i, row in df.iterrows():
         if row['MedalEarned'] == 1:
@@ -121,5 +119,7 @@ def PreviousMedals(df):
     if False:
         list = [ID for ID, occurrences in ID_medals.items() if occurrences >= 3]
         print(list)
-
+    
     return df
+
+
