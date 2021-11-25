@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 
 # ! Set seed and seed calling function
-rng = np.random.default_rng(1)
+#rng = np.random.default_rng(1)
 
 
 # ! Functions that manipulate dataframes and csv files
@@ -30,7 +30,7 @@ def Reshape(X, Y):
 
 
 # * Make df even
-def EvenDF(df):
+def EvenDF(df, rng):
     # Split dataframe into won a medal and didnt win a medal
     df_1 = df[df.MedalEarned == 1]
     df_0 = df[df.MedalEarned == 0]
@@ -42,9 +42,9 @@ def EvenDF(df):
 
 
 # * Make the X and Y data frames
-def TrainValidate(df, X_list, Y_list):
+def TrainValidate(df, X_list, Y_list, rng):
     # Randomly sample df_0 to size of df_1
-    df_1, df_0 = EvenDF(df)
+    df_1, df_0 = EvenDF(df, rng)
     
     # Randomly sample validate df_1 and df_0
     df_1_validate = df_1.sample(frac= 0.2, random_state=rng.integers(100000))
@@ -109,9 +109,9 @@ def Model(X, Y, l_rate, iterations):
 
 # ! The functions that run the model
 # * Run model
-def RunModel(df, iterations, l_rate, X_list, Y_list):
+def RunModel(df, rng, iterations, l_rate, X_list, Y_list):
     # Make X_train, Y_train, X_validate, Y_validate
-    X_train, Y_train, X_validate, Y_validate = TrainValidate(df, X_list, Y_list)
+    X_train, Y_train, X_validate, Y_validate = TrainValidate(df, X_list, Y_list, rng)
     
     # Import and reshape training and validation dataframes
     X_train, Y_train = Reshape(X_train, Y_train)
@@ -124,13 +124,13 @@ def RunModel(df, iterations, l_rate, X_list, Y_list):
 
 
 # * Run multiple iterations of the model
-def RunMore(df, X_list, Y_list, times, iterations, l_rate):
+def RunMore(df, X_list, Y_list, rng, times, iterations, l_rate):
     W_list = []
     B_list = []
     
     for i in range(times):
         # Run model
-        W, B = RunModel(df, iterations, l_rate, X_list, Y_list)
+        W, B = RunModel(df, rng, iterations, l_rate, X_list, Y_list)
         
         # Append parameters, accuracy and occurances to lists
         W_list.append(W)
