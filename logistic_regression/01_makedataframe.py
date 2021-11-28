@@ -1,5 +1,5 @@
 import pandas as pd
-import addcolumns as add
+import addvariables as add
 
 # ! Get dataset and variables
 filepath = 'athlete_events.csv'

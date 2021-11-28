@@ -7,9 +7,6 @@ Last accessed: 28/10/2021
 import numpy as np
 import pandas as pd
 
-# ! Set seed and seed calling function
-#rng = np.random.default_rng(1)
-
 
 # ! Functions that manipulate dataframes and csv files
 # * Reshapes X and Y files

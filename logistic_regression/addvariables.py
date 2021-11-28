@@ -123,3 +123,5 @@ def PreviousMedals(df):
     return df
 
 
+def NOCStrength():
+    return

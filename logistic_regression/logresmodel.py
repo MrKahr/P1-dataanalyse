@@ -9,10 +9,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # ! Set seed and seed calling function
-rng = np.random.default_rng(1)
+rng = np.random.default_rng(12345)
 
 # ! Get dataset
-filepath = 'dec_sep_MPHWA.csv'
+filepath = 'dec_sep_MPHWAE.csv'
 df = pd.read_csv(filepath)
 df= df.reset_index()
 
@@ -200,7 +200,7 @@ def Accuracy(X, Y, W, B):
     lin_func = np.dot(W.T, X) + B # Linear function
     sig_func = Sigmoid(lin_func) # Sigmoid function
     
-    sig_func = sig_func > 0.47 # Sets sig_func to one if > 0 or 0 if < 0
+    sig_func = sig_func > 0.6 # Sets sig_func to one if > 0 or 0 if < 0
     
     # Make sig_func array with data type int64
     sig_func = np.array(sig_func, dtype = 'int64') 
@@ -211,7 +211,7 @@ def Accuracy(X, Y, W, B):
     # 1 = True Pos, 0 = True Neg, -1 = False Neg, 2 = False Pos 
     guesses = sig_func * 2 - Y
     occurance = [[x, list(guesses[0]).count(x)] for x in set(list(guesses[0]))]
-    occurance_dic = {}
+    occurance_dic = {1:0, 0:0, -1:0, 2:0}
     
     for i in occurance:
         # Assign value to keys e.g. TP = 22 
@@ -347,11 +347,11 @@ def RunMore(times, iterations, learning_rate, plot_print= False, test= False):
 
 # * Test parameters on decathlon athletes
 def Decathlon(df, W_list, B_list):
-    wg = 8
+    wg = 1
     dec_acc_list = []
     dec_occ_list = []
-    dec_alt_acc_list = []
-    dec_alt_occ_list = []
+    #dec_alt_acc_list = []
+    #dec_alt_occ_list = []
     
     # Reduce and split X and Y dataframes
     X_dec = df[X_list]
@@ -362,11 +362,11 @@ def Decathlon(df, W_list, B_list):
     
     # Test parameters on dec
     for i in range(len(W_list)):
-        dec_alt_acc, dec_alt_occ_dic = AltClassify(dec_df, X_dec, Y_dec, W_list[i], B_list[i], wg)
+        #dec_alt_acc, dec_alt_occ_dic = AltClassify(dec_df, X_dec, Y_dec, W_list[i], B_list[i], wg)
         dec_acc, dec_occ_dic = Accuracy(X_dec, Y_dec, W_list[i], B_list[i])
         
-        dec_alt_acc_list.append(dec_alt_acc)
-        dec_alt_occ_list.append(dec_alt_occ_dic)
+        #dec_alt_acc_list.append(dec_alt_acc)
+        #dec_alt_occ_list.append(dec_alt_occ_dic)
         dec_acc_list.append(dec_acc)
         dec_occ_list.append(dec_occ_dic)
     
@@ -374,35 +374,18 @@ def Decathlon(df, W_list, B_list):
     PredRate(dec_occ_list, 'Decathlon')
     PrintAccReport(dec_acc_list, 'Decathlon')
     
-    PredRate(dec_alt_occ_list, 'Decathlon alt')
-    PrintAccReport(dec_alt_acc_list, 'Decathlon alt')
-
-
-def RocCurve(switch):
-    tpr_l = []
-    fpr_l = []
-    
-    # Run iterations of model and find tpr/fpr
-    if switch:
-        
-        W_list, B_list = RunMore(times= 50, iterations= 5000, learning_rate= 0.02, cop= 0.5)
-        dol, doal = Decathlon(dec_df, W_list, B_list, wg= 6, cop= 0.5)
-        tpr, fpr = PredRate(dol, '')
-        print(tpr, fpr)
-    
-    else:
-        pass
-    
-    return
+    #PredRate(dec_alt_occ_list, 'Decathlon alt')
+    #PrintAccReport(dec_alt_acc_list, 'Decathlon alt')
 
 
 # ! Variable list for X and Y
 X_list = ['ID', 
-        'PreviousMedals', 
         'Height_div_avg', 
         'Weight_div_avg', 
         'Age_div_avg'
         ]
+
+#        'PreviousMedals', 
 
 Y_list = ['ID', 'MedalEarned']
 
