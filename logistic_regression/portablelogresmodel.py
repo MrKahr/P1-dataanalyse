@@ -16,6 +16,7 @@ def Reshape(X, Y):
     Y = Y.drop("ID", axis = 1)
     
     # Define dataframes as variables
+    # Return a Numpy representation of the DataFrame.
     X = X.values
     Y = Y.values
     
