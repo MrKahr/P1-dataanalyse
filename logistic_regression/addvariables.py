@@ -123,5 +123,28 @@ def PreviousMedals(df):
     return df
 
 
-def NOCStrength():
+# ! Add NOC strength in given sport to observation
+# TODO Dictionary of competting NOC in given year
+# TODO Reduced dataframe to x years before given year
+# TODO Add up all medals earned, and add medals to their NOC in dic
+# TODO Add percentage of medals won by NOC to observations
+def NOCStrength(df):
+    df = df.sort_values(by= 'Year', ascending= True)
+    df_NOCstr = pd.DataFrame(index= range(len(df)), columns= [f'NOCStrength'])
+    years = df.Year.unique()
+    
+    df_g = df[(df.MedalEarned != 0)].groupby(['Year', 'NOC'])['MedalEarned'].sum().reset_index()
+    #df_g = df_gz.groupby(['Year', 'NOC'])['MedalEarned'].sum()
+    #df_g_r = df_g.reset_index()
+    #print(df_g_r)
+    
+    for i, year in enumerate(years):
+        df_g_r_y = df_g[(df_g.Year == year)]
+        print(df_g_r_y)
+        
+        if i <= 1:
+            pass
+        else:
+            pass
+    
     return

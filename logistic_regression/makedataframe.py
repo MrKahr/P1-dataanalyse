@@ -2,7 +2,7 @@ import pandas as pd
 import addvariables as add
 
 # ! Get dataset and variables
-filepath = 'athlete_events.csv'
+filepath = 'Datasets/athlete_events.csv'
 df = pd.read_csv(filepath)
 
 vals = ['Height', 'Weight', 'Age']
@@ -51,23 +51,30 @@ def AddTheese(df, name, medal= True, prev_med= True, div_avg= True, div_avg_even
         df = add.PreviousMedals(df)
         print('Added previous_medals')
     
+    # * remove unneeded variables and create dummy
+    df_noc = df['NOC']
+    df_dummy = pd.get_dummies(df_noc)
+    df_ = pd.concat([df, df_dummy], axis= 1)
+    
     # * reduce dataframe
     if reduce:
-        df = Reduction(df)
+        df_ = Reduction(df_)
         print('reduced')
     
     # * add diviation from average columns for given variables per year
     if div_avg:
-        df = add.DeviationAverage(df, vals)
+        df_ = add.DeviationAverage(df_, vals)
         print('Added div_avg')
     
     # * add diviation from average columns for given variables per year per event
     if div_avg_event:
-        df = add.DeviationAverageEvent(df, vals)
+        df_ = add.DeviationAverageEvent(df_, vals)
         print('Added div_avg_event')
     
+    df_d = df_.drop(['Name', 'Team', 'Games', 'Season', 'City', 'Sport', 'Medal', 'NOC', 'Event', 'Year', 'Sex'], axis= 1)
+    
     # * saves df as csv
-    df.to_csv(name + '.csv')
+    df_d.to_csv(name + '.csv')
 
 
-AddTheese(df, 'dec_sep_MPHWAE', div_avg= False, div_avg_event= True)
+AddTheese(df, 'dec_sep_NOCdummy')
