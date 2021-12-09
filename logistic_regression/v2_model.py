@@ -2,11 +2,13 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_curve
+from sklearn import metrics
 from imblearn.over_sampling import RandomOverSampler
 import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy import stats
-from scipy.stats import norm, skew
+from scipy.stats import norm
+from sklearn.linear_model import LogisticRegression
 
 
 # ! Create train and test datasets
@@ -205,7 +207,31 @@ def NormDist(X, W, B):
     plt.show()
 
 
-if False:
+# ! Logistic regression model using sklearn
+def LogResModel(df, X_list, Y_list):
+    X_t, X_val, Y_t, Y_val = TrainValidate(df, X_list, Y_list)
+    
+    Y_tr = np.ravel(Y_t)
+    
+    logisticRegr = LogisticRegression(max_iter= 10000)
+    logisticRegr.fit(X_t, Y_tr)
+    
+    predictions = logisticRegr.predict(X_val)
+    cm = metrics.confusion_matrix(Y_val, predictions)
+    score = logisticRegr.score(X_val, Y_val)
+    r_score = round(score * 100, 2)
+    print(f'Accuracy of sklearn model: {r_score}')
+    
+    plt.figure(figsize=(5,5))
+    sns.heatmap(cm, annot=True, fmt=".0f", square = True)
+    plt.ylabel('Actual label')
+    plt.xlabel('Predicted label')
+    all_sample_title = 'Accuracy Score: {0}'.format(r_score)
+    plt.title(all_sample_title)
+    plt.show()
+
+
+if True:
     # ! Import datasets
     filepath = 'Datasets/dec_sep_MPHWA.csv'
     df = pd.read_csv(filepath)
@@ -225,6 +251,7 @@ if False:
     #ROC(X_val, Y_val, W, B)
     #Confusion(val_acc, val_occ_dic)
     #Confusion(dec_acc, dec_occ)
+    LogResModel(df, X_list, Y_list)
     
     # TODO Make tabel to present accuracy results of the models
     
