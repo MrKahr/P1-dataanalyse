@@ -213,7 +213,7 @@ def LogResModel(df, X_list, Y_list):
     
     Y_tr = np.ravel(Y_t)
     
-    logisticRegr = LogisticRegression(max_iter= 10000)
+    logisticRegr = LogisticRegression()
     logisticRegr.fit(X_t, Y_tr)
     
     predictions = logisticRegr.predict(X_val)
@@ -231,7 +231,7 @@ def LogResModel(df, X_list, Y_list):
     plt.show()
 
 
-if True:
+if False:
     # ! Import datasets
     filepath = 'Datasets/dec_sep_MPHWA.csv'
     df = pd.read_csv(filepath)
