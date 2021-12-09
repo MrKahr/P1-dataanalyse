@@ -254,7 +254,7 @@ def Decathlon(df, X_list, Y_list, W_array, B_array, cop):
     
     # Test parameters on dec
     for i in range(len(W_array[0])):
-        W_par = np.array([W_array[0][i], W_array[1][i], W_array[2][i], W_array[3][i]], ndmin= 0)
+        W_par = np.array([W_array[0][i], W_array[1][i], W_array[2][i]], ndmin= 0)
         sf = Classify(X_dec, W_par, B_array[i], cop)
         da, dod = Accuracy(sf, Y_dec)
         dec_acc_list.append(da)
@@ -288,8 +288,8 @@ def TPFP(occ_l= []):
 
 
 # ! Run the model
-if False:
-    filepath = 'Datasets/dec_sep_MPHWAE.csv'
+if True:
+    filepath = 'Datasets/dec_sep_MPHWA.csv'
     df = pd.read_csv(filepath)
     df= df.reset_index()
     
@@ -298,18 +298,17 @@ if False:
     dec_df = dec_df.reset_index()
     
     X_list = ['ID', 
-            'PreviousMedals', 
-            'Height_div_avg', 
-            'Weight_div_avg', 
-            'Age_div_avg'
+            'Height', 
+            'Weight', 
+            'Age'
             ]
-    
+    #            'PreviousMedals', 
     Y_list = ['ID', 'MedalEarned']
     
     rng = np.random.default_rng(12345)
     
-    RunMore(df, X_list, Y_list, rng, cop = 0.65, times= 50, iterations= 5000, l_rate= 0.02)
+    RunMore(df, X_list, Y_list, rng, cop = 0.50, times= 50, iterations= 5000, l_rate= 0.00015)
     W_array = np.genfromtxt('W.csv', delimiter=',')
     B_array = np.genfromtxt('B.csv', delimiter=',')
     
-    Decathlon(dec_df, X_list, Y_list, W_array, B_array, cop= 0.65)
+    Decathlon(dec_df, X_list, Y_list, W_array, B_array, cop= 0.50)
