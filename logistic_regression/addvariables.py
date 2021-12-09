@@ -123,5 +123,39 @@ def PreviousMedals(df):
     return df
 
 
-def NOCStrength():
-    return
+# ! Add NOC strength in given sport to observation
+'''
+sort df for Year
+
+year_dic = {}
+
+for i, row in df.iterrows:
+    year = row.Year
+    
+    if year in year_dic:
+        if row.NOC not in year_dic:
+            row.NOCStr = 0
+        else:
+            row.NOCStr = year_dic[year][NOC]
+    else:
+        year_df = reduce df to before year
+        year_dic[year] = NOCStrength(df)
+        
+        if row.NOC not in year_dic:
+            row.NOCStr = 0
+        else:
+            row.NOCStr = year_dic[year][NOC]
+'''
+def NOCStrength(df):
+    # Amount of medals won by each NOC
+    ol_medal = df.groupby(['NOC'])['MedalEarned'].sum().sort_values(ascending=False)
+    
+    # Occurance count of each NOC
+    ol_count = df['NOC'].value_counts()
+    
+    ol_tabel = pd.DataFrame({'MedalSum': ol_medal, 'NOCOcc': ol_count}) # Make tabel
+    
+    # Calculate MedalEarned per athlete by NOC
+    ol_tabel['MedPerAth'] = ol_tabel.apply(lambda row: round(row.MedalSum / row.NOCOcc, 2), axis=1)
+    ol_tabel = ol_tabel.sort_values(by= 'MedPerAth', ascending= False)
+    print(ol_tabel.head(10))

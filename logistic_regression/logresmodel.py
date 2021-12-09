@@ -12,11 +12,11 @@ import matplotlib.pyplot as plt
 rng = np.random.default_rng(12345)
 
 # ! Get dataset
-filepath = 'dec_sep_MPHWAE.csv'
+filepath = 'Datasets/dec_sep_MPHWAE.csv'
 df = pd.read_csv(filepath)
 df= df.reset_index()
 
-dec_path = 'dec_MPHWA.csv'
+dec_path = 'datasets/dec_MPHWA.csv'
 dec_df = pd.read_csv(dec_path)
 dec_df = dec_df.reset_index()
 
@@ -380,9 +380,7 @@ def Decathlon(df, W_list, B_list):
 
 # ! Variable list for X and Y
 X_list = ['ID', 
-        'Height_div_avg', 
-        'Weight_div_avg', 
-        'Age_div_avg'
+        'Height'
         ]
 
 #        'PreviousMedals', 
