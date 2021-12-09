@@ -225,3 +225,6 @@ if False:
     #ROC(X_val, Y_val, W, B)
     #Confusion(val_acc, val_occ_dic)
     #Confusion(dec_acc, dec_occ)
+    
+    # TODO Make tabel to present accuracy results of the models
+    

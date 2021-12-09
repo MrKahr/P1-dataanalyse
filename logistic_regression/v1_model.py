@@ -11,10 +11,6 @@ import pandas as pd
 # ! Functions that manipulate dataframes and csv files
 # * Reshapes X and Y files
 def Reshape(X, Y):
-    # Drop id column from dataframes
-    X = X.drop("ID", axis = 1)
-    Y = Y.drop("ID", axis = 1)
-    
     # Define dataframes as variables
     X = X.values
     Y = Y.values
@@ -180,20 +176,33 @@ def Accuracy(sf, Y):
 
 
 # * Print accuracy
-def PrintAccReport(list_of_acc, name):
-    # Calculate average, min and max accuracy
-    acc_avg = sum(list_of_acc) / len(list_of_acc)
-    acc_min = min(list_of_acc)
-    acc_max = max(list_of_acc)
+def PrintAccReport(list_of_acc_lists):
+    avg_acc_list = []
+    min_acc_list = []
+    max_acc_list = []
     
-    # Print average, min and max accuracy
-    print(f'{name} results: avg {round(acc_avg * 100, 2)}% ', 
-                    f'min {round(acc_min * 100, 2)}% ', 
-                    f'max {round(acc_max * 100, 2)}% ')
+    for i, list_of_acc in enumerate(list_of_acc_lists):
+        # Calculate average, min and max accuracy
+        acc_avg = round(sum(list_of_acc) / len(list_of_acc)*100, 2)
+        acc_min = round(min(list_of_acc)*100, 2)
+        acc_max = round(max(list_of_acc)*100, 2)
+        
+        avg_acc_list.append(acc_avg)
+        min_acc_list.append(acc_min)
+        max_acc_list.append(acc_max)
+    
+    report = pd.DataFrame({
+                        'avg. acc.' : avg_acc_list,
+                        'min. acc.': min_acc_list,
+                        'max. acc.': max_acc_list
+                        },
+                        index= ['Validate', 'Test', 'Decathlon'])
+    
+    print(report)
 
 
 # * Run multiple iterations of the model
-def RunMore(df, X_list, Y_list, rng, cop, times, iterations, l_rate):
+def RunMore(df, X_list, Y_list, rng, cop, times, iterations, l_rate, save_par= False):
     W_list = []
     B_list = []
     val_acc_list = []
@@ -216,9 +225,6 @@ def RunMore(df, X_list, Y_list, rng, cop, times, iterations, l_rate):
         if len(W_list) % 10 == 0:
             print(f'{times - len(W_list)} runs left.')
     
-    # Print test sample accuracy
-    PrintAccReport(val_acc_list, 'Validation')
-    
     X_test, Y_test = Reshape(X_test, Y_test)
     test_occ_dic_list = []
     test_acc_list = []
@@ -230,14 +236,14 @@ def RunMore(df, X_list, Y_list, rng, cop, times, iterations, l_rate):
         test_acc_list.append(test_acc)
         test_occ_dic_list.append(test_occ_dic)
     
-    # Print test sample accuracy
-    PrintAccReport(test_acc_list, 'Test sample')
-    
     W_array = np.concatenate(W_list, axis=1)
     B_array = np.stack(B_list)
     
-    np.savetxt('W.csv', W_array, delimiter= ',')
-    np.savetxt('B.csv', B_array, delimiter= ',')
+    if save_par:
+        np.savetxt('W.csv', W_array, delimiter= ',')
+        np.savetxt('B.csv', B_array, delimiter= ',')
+    
+    return val_acc_list, test_acc_list, W_array, B_array
 
 
 # ! Run parameters on decathlon athletes
@@ -259,9 +265,6 @@ def Decathlon(df, X_list, Y_list, W_array, B_array, cop):
         da, dod = Accuracy(sf, Y_dec)
         dec_acc_list.append(da)
         dec_occ_list.append(dod)
-    
-    # Print decathlon accuracy
-    PrintAccReport(dec_acc_list, 'Decathlon')
     
     return dec_acc_list, dec_occ_list
 
@@ -296,18 +299,14 @@ if True:
     dec_df = pd.read_csv(dec_path)
     dec_df = dec_df.reset_index()
     
-    X_list = ['ID', 
-            'Height', 
-            'Weight', 
-            'Age'
-            ]
-    #            'PreviousMedals', 
-    Y_list = ['ID', 'MedalEarned']
+    X_list = ['Height', 'Weight', 'Age']
+    Y_list = ['MedalEarned']
     
     rng = np.random.default_rng(12345)
     
-    RunMore(df, X_list, Y_list, rng, cop = 0.50, times= 50, iterations= 5000, l_rate= 0.00015)
-    W_array = np.genfromtxt('W.csv', delimiter=',')
-    B_array = np.genfromtxt('B.csv', delimiter=',')
+    val_acc_list, test_acc_list, W_array, B_array = RunMore(df, X_list, Y_list, rng, cop = 0.50, times= 50, iterations= 5000, l_rate= 0.00015)
     
-    Decathlon(dec_df, X_list, Y_list, W_array, B_array, cop= 0.50)
+    dec_acc_list, dec_occ_list = Decathlon(dec_df, X_list, Y_list, W_array, B_array, cop= 0.50)
+    
+    list_of_acc_lists = [val_acc_list, test_acc_list, dec_acc_list]
+    PrintAccReport([val_acc_list, test_acc_list, dec_acc_list])
