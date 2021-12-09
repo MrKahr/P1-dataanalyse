@@ -6,30 +6,21 @@ from imblearn.over_sampling import RandomOverSampler
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# ! Import datasets
-filepath = 'Datasets/dec_sep_MPHWA.csv'
-df = pd.read_csv(filepath)
-df= df.reset_index()
 
-dec_path = 'Datasets/dec_MPHWA.csv'
-dec_df = pd.read_csv(dec_path)
-dec_df = dec_df.reset_index()
-
-# ! Define X/Y_list
-X_list = ['Height_div_avg', 'Weight_div_avg', 'Age_div_avg']
-
-Y_list = ['MedalEarned']
-
-# ! Define features and results
-X = df[X_list]
-Y = df[Y_list]
-
-# ! define train and validate sets
-X_train, X_validate, Y_train, Y_validate = train_test_split(X, Y, test_size= 0.3, random_state= 44)
-
-# ! Up-sample data
-over_sampler = RandomOverSampler(random_state=42)
-X_train, Y_train = over_sampler.fit_resample(X_train, Y_train)
+# ! Create train and test datasets
+def TrainValidate(df, X_list, Y_list):
+    # Define features and results
+    X = df[X_list]
+    Y = df[Y_list]
+    
+    # define train and validate sets
+    X_train, X_validate, Y_train, Y_validate = train_test_split(X, Y, test_size= 0.3, random_state= 44)
+    
+    # Up-sample data
+    over_sampler = RandomOverSampler(random_state=42)
+    X_train, Y_train = over_sampler.fit_resample(X_train, Y_train)
+    
+    return X_train, X_validate, Y_train, Y_validate
 
 
 # ! Reshapes X and Y files
@@ -114,22 +105,24 @@ def Classify(X, W, B, cop, bin= True):
 
 
 # ! Run model
-def RunModel(X_t, Y_t, X_validate, Y_validate, cop, iterations, l_rate):
+def RunModel(df, X_list, Y_list, cop, iterations, l_rate):
+    X_t, X_val, Y_t, Y_val = TrainValidate(df, X_list, Y_list)
+    
     # Import and reshape training and validation dataframes
     X_t, Y_t = Reshape(X_t, Y_t)
-    X_validate, Y_validate = Reshape(X_validate, Y_validate)
+    X_val, Y_val = Reshape(X_val, Y_val)
     
     # Call Model function
     W, B, cost_list = Model(X_t, Y_t, l_rate, iterations)
     
-    sf_val = Classify(X_validate, W, B, cop)
-    val_acc, val_occ_dic = Accuracy(sf_val, Y_validate)
+    sf_val = Classify(X_val, W, B, cop)
+    val_acc, val_occ_dic = Accuracy(sf_val, Y_val)
     
     print(f'Accuracy of the model is : {round(val_acc * 100, 2)}')
     plt.plot(np.arange(iterations), cost_list)
     plt.show()
     
-    return W, B, val_acc, val_occ_dic
+    return W, B, val_acc, val_occ_dic, X_val, Y_val
 
 
 # ! Run parameters on decathlon athletes
@@ -150,9 +143,6 @@ def Decathlon(df, X_list, Y_list, W, B, cop):
 
 # ! Predict probability
 def PredProb(X, W, B):
-    X = X.values
-    X = X.T
-    
     lin_func = np.dot(W.T, X) + B # Linear function
     sf = Sigmoid(lin_func) # Sigmoid function
     
@@ -162,7 +152,7 @@ def PredProb(X, W, B):
 # ! Plot ROC-curve
 def ROC(X_val, Y_val, W, B):
     pred_prob = PredProb(X_val, W, B)
-    false_positive_rate, true_positive_rate, threshold = roc_curve(Y_val, pred_prob.T)
+    false_positive_rate, true_positive_rate, threshold = roc_curve(Y_val.T, pred_prob.T)
     
     plt.subplots(1, figsize=(7,7))
     plt.title('Receiver Operating Characteristic - Logistic regression')
@@ -197,10 +187,22 @@ def Confusion(acc, occ):
     plt.show()
 
 
-cop = 0.50
-W, B, val_acc, val_occ_dic = RunModel(X_train, Y_train, X_validate, Y_validate, cop, iterations= 5000, l_rate= 0.00015)
-dec_acc, dec_occ = Decathlon(dec_df, X_list, Y_list, W, B, cop)
-
-ROC(X_validate, Y_validate, W, B)
-Confusion(val_acc, val_occ_dic)
-Confusion(dec_acc, dec_occ)
+if True:
+    # ! Import datasets
+    filepath = 'Datasets/dec_sep_MPHWA.csv'
+    df = pd.read_csv(filepath)
+    df= df.reset_index()
+    
+    dec_path = 'Datasets/dec_MPHWA.csv'
+    dec_df = pd.read_csv(dec_path)
+    dec_df = dec_df.reset_index()
+    
+    X_list = ['Height_div_avg', 'Weight_div_avg', 'Age_div_avg']
+    Y_list = ['MedalEarned']
+    
+    cop = 0.50
+    W, B, val_acc, val_occ_dic, X_val, Y_val = RunModel(df, X_list, Y_list, cop, iterations= 5000, l_rate= 0.00015)
+    dec_acc, dec_occ = Decathlon(dec_df, X_list, Y_list, W, B, cop)
+    ROC(X_val, Y_val, W, B)
+    Confusion(val_acc, val_occ_dic)
+    Confusion(dec_acc, dec_occ)
