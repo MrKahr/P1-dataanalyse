@@ -32,11 +32,11 @@ dfdf_MPHWA = df_MPHWA[(df_MPHWA.Sex == 'M') &
                 ]
 
 X_list = ['ID',
-          'PreviousMedals', 
-          'Height_div_avg', 
-          'Weight_div_avg', 
-          'Age_div_avg'
-          ]
+        'PreviousMedals', 
+        'Height_div_avg', 
+        'Weight_div_avg', 
+        'Age_div_avg'
+        ]
 
 # ? all results underneath are run with theese parameters:
 # ? run_more(times = 50, iterations= 3500, learning_rate= 0.0002)
