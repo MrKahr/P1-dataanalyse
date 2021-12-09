@@ -5,6 +5,8 @@ from sklearn.metrics import roc_curve
 from imblearn.over_sampling import RandomOverSampler
 import matplotlib.pyplot as plt
 import seaborn as sns
+from scipy import stats
+from scipy.stats import norm, skew
 
 
 # ! Create train and test datasets
@@ -187,7 +189,23 @@ def Confusion(acc, occ):
     plt.show()
 
 
-if True:
+# ! Plot normal distribution
+def NormDist(X, W, B):
+    x = PredProb(X, W, B)
+    
+    sns.distplot(x.T, fit=norm)
+    
+    #Now plot the distribution
+    plt.ylabel('Frequency')
+    plt.title('Probability Prediction Distribution')
+    
+    #Get also the QQ-plot
+    plt.figure()
+    stats.probplot(x[0], plot= plt)
+    plt.show()
+
+
+if False:
     # ! Import datasets
     filepath = 'Datasets/dec_sep_MPHWA.csv'
     df = pd.read_csv(filepath)
@@ -203,6 +221,7 @@ if True:
     cop = 0.50
     W, B, val_acc, val_occ_dic, X_val, Y_val = RunModel(df, X_list, Y_list, cop, iterations= 5000, l_rate= 0.00015)
     dec_acc, dec_occ = Decathlon(dec_df, X_list, Y_list, W, B, cop)
-    ROC(X_val, Y_val, W, B)
-    Confusion(val_acc, val_occ_dic)
-    Confusion(dec_acc, dec_occ)
+    #NormDist(X_val, W, B)
+    #ROC(X_val, Y_val, W, B)
+    #Confusion(val_acc, val_occ_dic)
+    #Confusion(dec_acc, dec_occ)
