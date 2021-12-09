@@ -20,9 +20,6 @@ X_list = ['Height_div_avg', 'Weight_div_avg', 'Age_div_avg']
 
 Y_list = ['MedalEarned']
 
-# ! Define seed
-rng = np.random.default_rng(12345)
-
 # ! Define features and results
 X = df[X_list]
 Y = df[Y_list]
