@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
+import seaborn as sns
 
 
 # ! Functions that manipulate dataframes and csv files
@@ -312,14 +313,44 @@ def TPFP(occ_l= []):
     
     return tpr, fpr
 
+# ! Plot confusion matrix
+def Confusion(acc, occ):
+    tp,fp,tn,fn = 0,0,0,0
+    
+    # Sum up all occurances of False negatives and positives
+    # 1 = True Pos, 0 = True Neg, -1 = False Neg, 2 = False Pos 
+    tp += occ[1]
+    tn += occ[0]
+    fn += occ[-1]
+    fp += occ[2]
+    
+    # True positive rate - sensitivity 
+    tpr = tp / (tp + fn)
+    # False Positive - type 1 error
+    fpr = fp / (fp + tn)
+    
+    print(f'True positive rate: {round(tpr*100, 2)}')
+    print(f'False positive rate: {round(fpr*100, 2)}')
+    
+    cm =    [[tn, fp],
+            [fn, tp]]
+    
+    plt.figure(figsize=(5,5))
+    sns.heatmap(cm, annot=True, fmt=".0f", square = True)
+    plt.ylabel('Actual label')
+    plt.xlabel('Predicted label')
+    all_sample_title = 'Accuracy Score: {0}'.format(round(acc * 100, 2))
+    plt.title(all_sample_title)
+    plt.show()
+
 
 # ! Run the model
 if True:
-    filepath = 'Datasets/dec_sep_MPHWA.csv'
+    filepath = 'Datasets/Datasets_we_dont_need/dec_sep_MPHWA.csv'
     df = pd.read_csv(filepath)
     df= df.reset_index()
     
-    dec_path = 'Datasets/dec_MPHWA.csv'
+    dec_path = 'Datasets/Datasets_we_dont_need/dec_MPHWA.csv'
     dec_df = pd.read_csv(dec_path)
     dec_df = dec_df.reset_index()
     
@@ -334,3 +365,8 @@ if True:
     
     list_of_acc_lists = [val_acc_list, test_acc_list, dec_acc_list]
     PrintAccReport([val_acc_list, test_acc_list, dec_acc_list])
+    
+    TPFP(val_acc_list)
+    TPFP(test_acc_list)
+    
+    
