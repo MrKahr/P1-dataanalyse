@@ -366,7 +366,5 @@ if True:
     list_of_acc_lists = [val_acc_list, test_acc_list, dec_acc_list]
     PrintAccReport([val_acc_list, test_acc_list, dec_acc_list])
     
-    TPFP(val_acc_list)
-    TPFP(test_acc_list)
     
     
