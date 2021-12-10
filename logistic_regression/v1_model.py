@@ -7,6 +7,7 @@ Last accessed: 28/10/2021
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from matplotlib.font_manager import FontProperties
 
 
 # ! Functions that manipulate dataframes and csv files
@@ -202,7 +203,10 @@ def PrintAccReport(list_of_acc_lists):
     fig, ax = plt.subplots()
     ax.axis('off')
     ax.axis('tight')
-    t= ax.table(cellText=report[['Avg. Acc.', 'Min. Acc.', 'Max. Acc.']].head( n=3).values, colWidths = [0.2]*len(report.columns), colColours = ['royalblue']*3 , rowLabels=report.index ,colLabels=report.columns,  loc='center')
+    t= ax.table(cellText=report[['Avg. Acc.', 'Min. Acc.', 'Max. Acc.']].head( n=3).values,
+                colWidths = [0.2]*len(report.columns), colColours = ['royalblue']*3,
+                rowLabels=report.index ,colLabels=report.columns,  loc='center')
+    
     t.auto_set_font_size(False) 
     t.set_fontsize(8)
     fig.tight_layout()
@@ -211,8 +215,6 @@ def PrintAccReport(list_of_acc_lists):
     cell.get_text().set_color('white')
     cell2.get_text().set_color('white')
     cell3.get_text().set_color('white')
-    
-    from matplotlib.font_manager import FontProperties
     
     for (row, col), cell in t.get_celld().items():
         if (row == 0) or (col == 5):

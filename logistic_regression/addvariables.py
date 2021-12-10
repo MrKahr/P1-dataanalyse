@@ -124,29 +124,7 @@ def PreviousMedals(df):
 
 
 # ! Add NOC strength in given sport to observation
-'''
-sort df for Year
-
-year_dic = {}
-
-for i, row in df.iterrows:
-    year = row.Year
-    
-    if year in year_dic:
-        if row.NOC not in year_dic:
-            row.NOCStr = 0
-        else:
-            row.NOCStr = year_dic[year][NOC]
-    else:
-        year_df = reduce df to before year
-        year_dic[year] = NOCStrength(df)
-        
-        if row.NOC not in year_dic:
-            row.NOCStr = 0
-        else:
-            row.NOCStr = year_dic[year][NOC]
-'''
-def NOCStrength(df):
+def NOCBlackBox(df):
     # Amount of medals won by each NOC
     ol_medal = df.groupby(['NOC'])['MedalEarned'].sum().sort_values(ascending=False)
     
@@ -158,4 +136,46 @@ def NOCStrength(df):
     # Calculate MedalEarned per athlete by NOC
     ol_tabel['MedPerAth'] = ol_tabel.apply(lambda row: round(row.MedalSum / row.NOCOcc, 2), axis=1)
     ol_tabel = ol_tabel.sort_values(by= 'MedPerAth', ascending= False)
-    print(ol_tabel.head(10))
+    #print(ol_tabel)
+    ol_tabel = ol_tabel.reset_index()
+    return ol_tabel
+
+
+def NOCStrength(df):
+    nocYearDict = {}
+    
+    for i, row in df.iterrows():
+        year = row['Year']
+        noc = row['NOC']
+        
+        key = str(year) + noc
+        
+        if key in nocYearDict:
+            # already Registered
+            val = nocYearDict[key]
+        else:
+            dfBefore = df[df.Year > year]
+            
+            if len(dfBefore) > 0:
+                nocDF = NOCBlackBox(dfBefore)
+                # Register new keys
+                for j, row2 in nocDF.iterrows():
+                    tempNoc = row2['index'] # the NOC is the index of the DF
+                    tempKey = str(year) + tempNoc
+                    
+                    nocYearDict[tempKey] = row2['MedPerAth']
+                
+                if key in nocYearDict:
+                    # newly registered and now in the DF
+                    val = nocYearDict[key]
+                else:
+                    # newly registered and still not in the DF
+                    nocYearDict[key] = 0
+                    val = nocYearDict[key]
+            else:
+                # Not registered and not in the df
+                nocYearDict[key] = 0
+                val = nocYearDict[key]
+        df.loc[i,'NOC_advantage'] = val
+    
+    return df

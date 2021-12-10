@@ -179,6 +179,14 @@ def Confusion(acc, occ):
     fn += occ[-1]
     fp += occ[2]
     
+    # True positive rate - sensitivity 
+    tpr = tp / (tp + fn)
+    # False Positive - type 1 error
+    fpr = fp / (fp + tn)
+    
+    print(f'True positive rate: {round(tpr*100, 2)}')
+    print(f'False positive rate: {round(fpr*100, 2)}')
+    
     cm =    [[tn, fp],
             [fn, tp]]
     
@@ -234,22 +242,22 @@ def LogResModel(df, X_list, Y_list):
 
 if True:
     # ! Import datasets
-    filepath = 'Datasets/dec_sep_MPHWA.csv'
+    filepath = 'Datasets/expert_data.csv'
     df = pd.read_csv(filepath)
     df= df.reset_index()
     
-    dec_path = 'Datasets/dec_MPHWA.csv'
+    dec_path = 'Datasets/decathlon_data.csv'
     dec_df = pd.read_csv(dec_path)
     dec_df = dec_df.reset_index()
     
     # ! Training features
-    X_list = ['Height_div_avg', 'Weight_div_avg', 'Age_div_avg']
+    X_list = ['PreviousMedals', 'NOC_advantage', 'Height_div_avg', 'Weight_div_avg', 'Age_div_avg']
     Y_list = ['MedalEarned']
     
-    cop = 0.50
-    W, B, val_acc, val_occ_dic, X_val, Y_val = RunModel(df, X_list, Y_list, cop, iterations= 5000, l_rate= 0.00015)
+    cop = 0.6
+    W, B, val_acc, val_occ_dic, X_val, Y_val = RunModel(df, X_list, Y_list, cop, iterations= 80000, l_rate= 0.0223)
     dec_acc, dec_occ = Decathlon(dec_df, X_list, Y_list, W, B, cop)
-    NormDist(X_val, W, B)
+    #NormDist(X_val, W, B)
     ROC(X_val, Y_val, W, B)
     Confusion(val_acc, val_occ_dic)
     Confusion(dec_acc, dec_occ)
