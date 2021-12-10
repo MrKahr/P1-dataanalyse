@@ -194,7 +194,6 @@ def Confusion(acc, occ):
 # ! Plot normal distribution
 def NormDist(X, W, B):
     x = PredProb(X, W, B)
-    
     sns.distplot(x.T, fit=norm)
     
     #Now plot the distribution
@@ -211,12 +210,14 @@ def NormDist(X, W, B):
 def LogResModel(df, X_list, Y_list):
     X_t, X_val, Y_t, Y_val = TrainValidate(df, X_list, Y_list)
     
-    Y_tr = np.ravel(Y_t)
+    Y_tr = np.ravel(Y_t) # change to shape (n, )
     
-    logisticRegr = LogisticRegression()
-    logisticRegr.fit(X_t, Y_tr)
+    logisticRegr = LogisticRegression() # Model
+    logisticRegr.fit(X_t, Y_tr) # Train model
     
-    predictions = logisticRegr.predict(X_val)
+    predictions = logisticRegr.predict(X_val) # Make predictions
+    
+    # Make confusion matrix and calculate acc
     cm = metrics.confusion_matrix(Y_val, predictions)
     score = logisticRegr.score(X_val, Y_val)
     r_score = round(score * 100, 2)
@@ -231,7 +232,7 @@ def LogResModel(df, X_list, Y_list):
     plt.show()
 
 
-if False:
+if True:
     # ! Import datasets
     filepath = 'Datasets/dec_sep_MPHWA.csv'
     df = pd.read_csv(filepath)
@@ -241,17 +242,17 @@ if False:
     dec_df = pd.read_csv(dec_path)
     dec_df = dec_df.reset_index()
     
+    # ! Training features
     X_list = ['Height_div_avg', 'Weight_div_avg', 'Age_div_avg']
     Y_list = ['MedalEarned']
     
     cop = 0.50
     W, B, val_acc, val_occ_dic, X_val, Y_val = RunModel(df, X_list, Y_list, cop, iterations= 5000, l_rate= 0.00015)
     dec_acc, dec_occ = Decathlon(dec_df, X_list, Y_list, W, B, cop)
-    #NormDist(X_val, W, B)
-    #ROC(X_val, Y_val, W, B)
-    #Confusion(val_acc, val_occ_dic)
-    #Confusion(dec_acc, dec_occ)
+    NormDist(X_val, W, B)
+    ROC(X_val, Y_val, W, B)
+    Confusion(val_acc, val_occ_dic)
+    Confusion(dec_acc, dec_occ)
     LogResModel(df, X_list, Y_list)
     
     # TODO Make tabel to present accuracy results of the models
-    
