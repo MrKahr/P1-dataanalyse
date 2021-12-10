@@ -6,6 +6,7 @@ Last accessed: 28/10/2021
 
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 
 # ! Functions that manipulate dataframes and csv files
@@ -187,16 +188,37 @@ def PrintAccReport(list_of_acc_lists):
         acc_min = round(min(list_of_acc)*100, 2)
         acc_max = round(max(list_of_acc)*100, 2)
         
-        avg_acc_list.append(acc_avg)
-        min_acc_list.append(acc_min)
-        max_acc_list.append(acc_max)
+        avg_acc_list.append(f'{acc_avg} %')
+        min_acc_list.append(f'{acc_min} %')
+        max_acc_list.append(f'{acc_max} %')
     
     report = pd.DataFrame({
-                        'avg. acc.' : avg_acc_list,
-                        'min. acc.': min_acc_list,
-                        'max. acc.': max_acc_list
+                        'Avg. Acc.' : avg_acc_list,
+                        'Min. Acc.': min_acc_list,
+                        'Max. Acc.': max_acc_list
                         },
                         index= ['Validate', 'Test', 'Decathlon'])
+    
+    fig, ax = plt.subplots()
+    ax.axis('off')
+    ax.axis('tight')
+    t= ax.table(cellText=report[['Avg. Acc.', 'Min. Acc.', 'Max. Acc.']].head( n=3).values, colWidths = [0.2]*len(report.columns), colColours = ['royalblue']*3 , rowLabels=report.index ,colLabels=report.columns,  loc='center')
+    t.auto_set_font_size(False) 
+    t.set_fontsize(8)
+    fig.tight_layout()
+    
+    cell, cell2, cell3 = t[0,0], t[0,1], t[0,2]
+    cell.get_text().set_color('white')
+    cell2.get_text().set_color('white')
+    cell3.get_text().set_color('white')
+    
+    from matplotlib.font_manager import FontProperties
+    
+    for (row, col), cell in t.get_celld().items():
+        if (row == 0) or (col == 5):
+            cell.set_text_props(fontproperties=FontProperties(weight = 'bold'))
+    
+    plt.show()
     
     print(report)
 
