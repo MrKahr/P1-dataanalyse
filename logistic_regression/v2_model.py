@@ -240,7 +240,7 @@ def LogResModel(df, X_list, Y_list):
     plt.show()
 
 
-if True:
+if False:
     # ! Import datasets
     filepath = 'Datasets/expert_data.csv'
     df = pd.read_csv(filepath)

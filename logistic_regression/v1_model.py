@@ -314,12 +314,12 @@ def TPFP(occ_l= []):
 
 
 # ! Run the model
-if True:
-    filepath = 'Datasets/dec_sep_MPHWA.csv'
+if False:
+    filepath = 'Datasets/expert_data.csv'
     df = pd.read_csv(filepath)
     df= df.reset_index()
     
-    dec_path = 'Datasets/dec_MPHWA.csv'
+    dec_path = 'Datasets/decathlon_data.csv'
     dec_df = pd.read_csv(dec_path)
     dec_df = dec_df.reset_index()
     
@@ -328,7 +328,7 @@ if True:
     
     rng = np.random.default_rng(12345)
     
-    val_acc_list, test_acc_list, W_array, B_array = RunMore(df, X_list, Y_list, rng, cop = 0.50, times= 50, iterations= 5000, l_rate= 0.00015)
+    val_acc_list, test_acc_list, W_array, B_array = RunMore(df, X_list, Y_list, rng, cop = 0.50, times= 50, iterations= 5000, l_rate= 0.00015, save_par= True)
     
     dec_acc_list, dec_occ_list = Decathlon(dec_df, X_list, Y_list, W_array, B_array, cop= 0.50)
     
