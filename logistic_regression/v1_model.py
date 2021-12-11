@@ -179,10 +179,12 @@ def Accuracy(sf, Y):
 
 
 # * Print accuracy
-def PrintAccReport(list_of_acc_lists):
+def PrintAccReport(list_of_acc_lists, list_of_occ_lists):
     avg_acc_list = []
     min_acc_list = []
     max_acc_list = []
+    tpr_list = []
+    fpr_list = []
     
     for i, list_of_acc in enumerate(list_of_acc_lists):
         # Calculate average, min and max accuracy
@@ -193,37 +195,43 @@ def PrintAccReport(list_of_acc_lists):
         avg_acc_list.append(f'{acc_avg} %')
         min_acc_list.append(f'{acc_min} %')
         max_acc_list.append(f'{acc_max} %')
+        
+    for i, list_of_occ in enumerate(list_of_occ_lists):
+        tpr,fpr = TPFP(list_of_occ)
+        tpr_list.append(format(tpr, ".2f"))
+        fpr_list.append(format(fpr, ".2f"))
     
     report = pd.DataFrame({
                         'Avg. Acc.' : avg_acc_list,
                         'Min. Acc.': min_acc_list,
-                        'Max. Acc.': max_acc_list
+                        'Max. Acc.': max_acc_list,
+                        'TPR': tpr_list,
+                        'FPR': fpr_list
                         },
                         index= ['Validate', 'Test', 'Decathlon'])
     
     fig, ax = plt.subplots()
     ax.axis('off')
     ax.axis('tight')
-    t= ax.table(cellText=report[['Avg. Acc.', 'Min. Acc.', 'Max. Acc.']].head( n=3).values,
-                colWidths = [0.2]*len(report.columns), colColours = ['royalblue']*3,
+    t= ax.table(cellText=report[['Avg. Acc.', 'Min. Acc.', 'Max. Acc.', 'TPR', 'FPR']].head( n=3).values,
+                colWidths = [0.2]*len(report.columns), colColours = ['royalblue']*5,
                 rowLabels=report.index ,colLabels=report.columns,  loc='center')
     
     t.auto_set_font_size(False) 
     t.set_fontsize(8)
     fig.tight_layout()
     
-    cell, cell2, cell3 = t[0,0], t[0,1], t[0,2]
-    cell.get_text().set_color('white')
-    cell2.get_text().set_color('white')
-    cell3.get_text().set_color('white')
-    
+    for i in range(5):
+        cell = t[0,i]
+        cell.get_text().set_color('white')
+        
+        
     for (row, col), cell in t.get_celld().items():
         if (row == 0) or (col == 5):
             cell.set_text_props(fontproperties=FontProperties(weight = 'bold'))
     
     plt.show()
     
-    print(report)
 
 
 # * Run multiple iterations of the model
@@ -368,10 +376,7 @@ if True:
     dec_acc_list, dec_occ_list = Decathlon(dec_df, X_list, Y_list, W_array, B_array, cop= 0.50)
     
     list_of_acc_lists = [val_acc_list, test_acc_list, dec_acc_list]
-    PrintAccReport([val_acc_list, test_acc_list, dec_acc_list])
-    TPFP(val_occ_list, 'Validation')
-    TPFP(test_occ_dic_list, 'Test')
-    TPFP(dec_occ_list, 'Decathlon')
+    PrintAccReport([val_acc_list, test_acc_list, dec_acc_list], [val_occ_list,test_occ_dic_list,dec_occ_list])
     
     
     
