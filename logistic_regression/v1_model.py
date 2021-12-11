@@ -268,7 +268,7 @@ def RunMore(df, X_list, Y_list, rng, cop, times, iterations, l_rate, save_par= F
         np.savetxt('W.csv', W_array, delimiter= ',')
         np.savetxt('B.csv', B_array, delimiter= ',')
     
-    return val_acc_list, test_acc_list, W_array, B_array
+    return val_acc_list, test_acc_list, W_array, B_array, val_occ_list, test_occ_dic_list
 
 
 # ! Run parameters on decathlon athletes
@@ -295,7 +295,7 @@ def Decathlon(df, X_list, Y_list, W_array, B_array, cop):
 
 
 # ! Calculate True Positive and False Positive
-def TPFP(occ_l= []):
+def TPFP(occ_l= [], dataset = ''):
     tp,fp,tn,fn = 0,0,0,0 
     
     # Sum up all occurances of False negatives and positives
@@ -310,6 +310,10 @@ def TPFP(occ_l= []):
     tpr = tp / (tp + fn)
     # False Positive - type 1 error
     fpr = fp / (fp + tn)
+    
+    
+    print(f'TPR for {dataset} is {tpr}')
+    print(f'FPR for {dataset} is {fpr}')
     
     return tpr, fpr
 
@@ -359,12 +363,15 @@ if True:
     
     rng = np.random.default_rng(12345)
     
-    val_acc_list, test_acc_list, W_array, B_array = RunMore(df, X_list, Y_list, rng, cop = 0.50, times= 50, iterations= 5000, l_rate= 0.00015)
+    val_acc_list, test_acc_list, W_array, B_array, val_occ_list, test_occ_dic_list = RunMore(df, X_list, Y_list, rng, cop = 0.50, times= 50, iterations= 5000, l_rate= 0.00015)
     
     dec_acc_list, dec_occ_list = Decathlon(dec_df, X_list, Y_list, W_array, B_array, cop= 0.50)
     
     list_of_acc_lists = [val_acc_list, test_acc_list, dec_acc_list]
     PrintAccReport([val_acc_list, test_acc_list, dec_acc_list])
+    TPFP(val_occ_list, 'Validation')
+    TPFP(test_occ_dic_list, 'Test')
+    TPFP(dec_occ_list, 'Decathlon')
     
     
     
