@@ -303,7 +303,7 @@ def Decathlon(df, X_list, Y_list, W_array, B_array, cop):
 
 
 # ! Calculate True Positive and False Positive
-def TPFP(occ_l= [], dataset = ''):
+def TPFP(occ_l= []):
     tp,fp,tn,fn = 0,0,0,0 
     
     # Sum up all occurances of False negatives and positives
@@ -318,10 +318,6 @@ def TPFP(occ_l= [], dataset = ''):
     tpr = tp / (tp + fn)
     # False Positive - type 1 error
     fpr = fp / (fp + tn)
-    
-    
-    print(f'TPR for {dataset} is {tpr}')
-    print(f'FPR for {dataset} is {fpr}')
     
     return tpr, fpr
 
