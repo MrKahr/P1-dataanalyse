@@ -196,6 +196,7 @@ def PrintAccReport(list_of_acc_lists, list_of_occ_lists):
         min_acc_list.append(f'{acc_min} %')
         max_acc_list.append(f'{acc_max} %')
         
+        #Calcluate the True Positive Rate and False Positive Rate
     for i, list_of_occ in enumerate(list_of_occ_lists):
         tpr,fpr = TPFP(list_of_occ)
         tpr_list.append(format(tpr, ".2f"))
@@ -322,15 +323,16 @@ def TPFP(occ_l= []):
     return tpr, fpr
 
 # ! Plot confusion matrix
-def Confusion(acc, occ):
+def Confusion(acc, occ, times = 50, data_title = ''):
     tp,fp,tn,fn = 0,0,0,0
     
     # Sum up all occurances of False negatives and positives
     # 1 = True Pos, 0 = True Neg, -1 = False Neg, 2 = False Pos 
-    tp += occ[1]
-    tn += occ[0]
-    fn += occ[-1]
-    fp += occ[2]
+    for i in range(times):
+        tp += occ[i][1]
+        tn += occ[i][0]
+        fn += occ[i][-1]
+        fp += occ[i][2]
     
     # True positive rate - sensitivity 
     tpr = tp / (tp + fn)
@@ -345,10 +347,9 @@ def Confusion(acc, occ):
     
     plt.figure(figsize=(5,5))
     sns.heatmap(cm, annot=True, fmt=".0f", square = True)
-    plt.ylabel('Actual label')
-    plt.xlabel('Predicted label')
-    all_sample_title = 'Accuracy Score: {0}'.format(round(acc * 100, 2))
-    plt.title(all_sample_title)
+    plt.ylabel('Actual outcome')
+    plt.xlabel('Predicted outcome')
+    plt.title(data_title)
     plt.show()
 
 
@@ -375,4 +376,7 @@ if True:
     PrintAccReport([val_acc_list, test_acc_list, dec_acc_list], [val_occ_list,test_occ_dic_list,dec_occ_list])
     
     
+    Confusion(sum(val_acc_list)/len(val_acc_list),val_occ_list, data_title = 'Validation Matrix')
+    Confusion(sum(test_acc_list)/len(test_acc_list),test_occ_dic_list, data_title = 'Test Matrix')
+    Confusion(sum(dec_acc_list)/len(dec_acc_list),dec_occ_list, data_title = 'Decathlon Matrix')
     
