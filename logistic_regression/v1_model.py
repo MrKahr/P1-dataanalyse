@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
+import seaborn as sns
 
 
 # ! Functions that manipulate dataframes and csv files
@@ -178,10 +179,12 @@ def Accuracy(sf, Y):
 
 
 # * Print accuracy
-def PrintAccReport(list_of_acc_lists):
+def PrintAccReport(list_of_acc_lists, list_of_occ_lists):
     avg_acc_list = []
     min_acc_list = []
     max_acc_list = []
+    tpr_list = []
+    fpr_list = []
     
     for i, list_of_acc in enumerate(list_of_acc_lists):
         # Calculate average, min and max accuracy
@@ -192,37 +195,44 @@ def PrintAccReport(list_of_acc_lists):
         avg_acc_list.append(f'{acc_avg} %')
         min_acc_list.append(f'{acc_min} %')
         max_acc_list.append(f'{acc_max} %')
+        
+        #Calcluate the True Positive Rate and False Positive Rate
+    for i, list_of_occ in enumerate(list_of_occ_lists):
+        tpr,fpr = TPFP(list_of_occ)
+        tpr_list.append(format(tpr, ".2f"))
+        fpr_list.append(format(fpr, ".2f"))
     
     report = pd.DataFrame({
                         'Avg. Acc.' : avg_acc_list,
                         'Min. Acc.': min_acc_list,
-                        'Max. Acc.': max_acc_list
+                        'Max. Acc.': max_acc_list,
+                        'TPR': tpr_list,
+                        'FPR': fpr_list
                         },
                         index= ['Validate', 'Test', 'Decathlon'])
     
     fig, ax = plt.subplots()
     ax.axis('off')
     ax.axis('tight')
-    t= ax.table(cellText=report[['Avg. Acc.', 'Min. Acc.', 'Max. Acc.']].head( n=3).values,
-                colWidths = [0.2]*len(report.columns), colColours = ['royalblue']*3,
+    t= ax.table(cellText=report[['Avg. Acc.', 'Min. Acc.', 'Max. Acc.', 'TPR', 'FPR']].head( n=3).values,
+                colWidths = [0.2]*len(report.columns), colColours = ['royalblue']*5,
                 rowLabels=report.index ,colLabels=report.columns,  loc='center')
     
     t.auto_set_font_size(False) 
     t.set_fontsize(8)
     fig.tight_layout()
     
-    cell, cell2, cell3 = t[0,0], t[0,1], t[0,2]
-    cell.get_text().set_color('white')
-    cell2.get_text().set_color('white')
-    cell3.get_text().set_color('white')
-    
+    for i in range(5):
+        cell = t[0,i]
+        cell.get_text().set_color('white')
+        
+        
     for (row, col), cell in t.get_celld().items():
         if (row == 0) or (col == 5):
             cell.set_text_props(fontproperties=FontProperties(weight = 'bold'))
     
     plt.show()
     
-    print(report)
 
 
 # * Run multiple iterations of the model
@@ -267,7 +277,7 @@ def RunMore(df, X_list, Y_list, rng, cop, times, iterations, l_rate, save_par= F
         np.savetxt('W.csv', W_array, delimiter= ',')
         np.savetxt('B.csv', B_array, delimiter= ',')
     
-    return val_acc_list, test_acc_list, W_array, B_array
+    return val_acc_list, test_acc_list, W_array, B_array, val_occ_list, test_occ_dic_list
 
 
 # ! Run parameters on decathlon athletes
@@ -312,14 +322,44 @@ def TPFP(occ_l= []):
     
     return tpr, fpr
 
+# ! Plot confusion matrix
+def Confusion(acc, occ, times = 50, data_title = ''):
+    tp,fp,tn,fn = 0,0,0,0
+    
+    # Sum up all occurances of False negatives and positives
+    # 1 = True Pos, 0 = True Neg, -1 = False Neg, 2 = False Pos 
+    for i in range(times):
+        tp += occ[i][1]
+        tn += occ[i][0]
+        fn += occ[i][-1]
+        fp += occ[i][2]
+    
+    # True positive rate - sensitivity 
+    tpr = tp / (tp + fn)
+    # False Positive - type 1 error
+    fpr = fp / (fp + tn)
+    
+    print(f'True positive rate: {round(tpr*100, 2)}')
+    print(f'False positive rate: {round(fpr*100, 2)}')
+    
+    cm =    [[tn, fp],
+            [fn, tp]]
+    
+    plt.figure(figsize=(5,5))
+    sns.heatmap(cm, annot=True, fmt=".0f", square = True)
+    plt.ylabel('Actual outcome')
+    plt.xlabel('Predicted outcome')
+    plt.title(data_title)
+    plt.show()
+
 
 # ! Run the model
 if True:
-    filepath = 'Datasets/dec_sep_MPHWA.csv'
+    filepath = 'Datasets/Datasets_we_dont_need/dec_sep_MPHWA.csv'
     df = pd.read_csv(filepath)
     df= df.reset_index()
     
-    dec_path = 'Datasets/dec_MPHWA.csv'
+    dec_path = 'Datasets/Datasets_we_dont_need/dec_MPHWA.csv'
     dec_df = pd.read_csv(dec_path)
     dec_df = dec_df.reset_index()
     
@@ -328,9 +368,15 @@ if True:
     
     rng = np.random.default_rng(12345)
     
-    val_acc_list, test_acc_list, W_array, B_array = RunMore(df, X_list, Y_list, rng, cop = 0.50, times= 50, iterations= 5000, l_rate= 0.00015)
+    val_acc_list, test_acc_list, W_array, B_array, val_occ_list, test_occ_dic_list = RunMore(df, X_list, Y_list, rng, cop = 0.50, times= 50, iterations= 5000, l_rate= 0.00015)
     
     dec_acc_list, dec_occ_list = Decathlon(dec_df, X_list, Y_list, W_array, B_array, cop= 0.50)
     
     list_of_acc_lists = [val_acc_list, test_acc_list, dec_acc_list]
-    PrintAccReport([val_acc_list, test_acc_list, dec_acc_list])
+    PrintAccReport([val_acc_list, test_acc_list, dec_acc_list], [val_occ_list,test_occ_dic_list,dec_occ_list])
+    
+    
+    Confusion(sum(val_acc_list)/len(val_acc_list),val_occ_list, data_title = 'Validation Matrix')
+    Confusion(sum(test_acc_list)/len(test_acc_list),test_occ_dic_list, data_title = 'Test Matrix')
+    Confusion(sum(dec_acc_list)/len(dec_acc_list),dec_occ_list, data_title = 'Decathlon Matrix')
+    
