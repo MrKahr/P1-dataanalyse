@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy import stats
 from scipy.stats import norm
+from matplotlib.font_manager import FontProperties
 from sklearn.linear_model import LogisticRegression
 
 
@@ -57,8 +58,8 @@ def Model(X, Y, l_rate, iterations):
     cost_list = [] # Empty cost list
     
     for i in range(iterations):
-        lin_func = np.dot(W.T, X) + B # Linear function
-        sf = Sigmoid(lin_func) # Sigmoid function
+        lf = np.dot(W.T, X) + B # Linear function
+        sf = Sigmoid(lf) # Sigmoid function
         
         # Cost function
         cost = -(1/m)*np.sum( Y*np.log(sf) + (1-Y)*np.log(1-sf))
@@ -79,8 +80,8 @@ def Model(X, Y, l_rate, iterations):
 # * Calculate accuracy of the model
 def Accuracy(sf, Y):
     # 1 = True Pos, 0 = True Neg, -1 = False Neg, 2 = False Pos 
-    guesses = sf * 2 - Y
-    occurance = [[x, list(guesses[0]).count(x)] for x in set(list(guesses[0]))]
+    predictions = sf * 2 - Y
+    occurance = [[x, list(predictions[0]).count(x)] for x in set(list(predictions[0]))]
     occ_d = {1:0, 0:0, -1:0, 2:0}
     
     # Assign value to keys e.g. TP : 22
@@ -90,16 +91,19 @@ def Accuracy(sf, Y):
     # True Positive, True Negative, False Positive and False Negative
     tp, tn, fp, fn = occ_d[1], occ_d[0], occ_d[2], occ_d[-1]
     
+    cm = [[tn, fp],
+        [fn, tp]]
+    
     # Calculate accuracy
     acc = (tp + tn) / (tp + tn + fp + fn)
     
-    return acc, occ_d
+    return acc, cm
 
 
 # * Classify winners and losers
-def Classify(X, W, B, cop, bin= True):
-    lin_func = np.dot(W.T, X) + B # Linear function
-    sf = Sigmoid(lin_func) # Sigmoid function
+def Classify(X, W, B, cop):
+    lf = np.dot(W.T, X) + B # Linear function
+    sf = Sigmoid(lf) # Sigmoid function
     
     # Make sf binary array with data type int64
     sf = sf > cop # Sets sf to one if > 0 or 0 if < 0
@@ -109,24 +113,27 @@ def Classify(X, W, B, cop, bin= True):
 
 
 # ! Run model
-def RunModel(df, X_list, Y_list, cop, iterations, l_rate):
-    X_t, X_val, Y_t, Y_val = TrainValidate(df, X_list, Y_list)
+def RunModel(df, X_list, Y_list, cop, iterations, learning_rate):
+    X_train, X_validate, Y_train, Y_validate = TrainValidate(df, X_list, Y_list)
     
     # Import and reshape training and validation dataframes
-    X_t, Y_t = Reshape(X_t, Y_t)
-    X_val, Y_val = Reshape(X_val, Y_val)
+    X_train, Y_train = Reshape(X_train, Y_train)
+    X_validate, Y_validate = Reshape(X_validate, Y_validate)
     
     # Call Model function
-    W, B, cost_list = Model(X_t, Y_t, l_rate, iterations)
+    W, B, cost_list = Model(X_train, Y_train, learning_rate, iterations)
     
-    sf_val = Classify(X_val, W, B, cop)
-    val_acc, val_occ_dic = Accuracy(sf_val, Y_val)
+    # Calculate accuracy of model
+    val_sf = Classify(X_validate, W, B, cop)
+    val_acc, val_cm = Accuracy(val_sf, Y_validate)
+    val_acc = f'{round(val_acc * 100, 2)} %'
     
-    print(f'Accuracy of the model is : {round(val_acc * 100, 2)}')
+    # Plot cost value over model iterations and print accuracy
+    print(f'Accuracy of the model is : {val_acc}')
     plt.plot(np.arange(iterations), cost_list)
     plt.show()
     
-    return W, B, val_acc, val_occ_dic, X_val, Y_val
+    return W, B, val_acc, val_cm, X_validate, Y_validate
 
 
 # ! Run parameters on decathlon athletes
@@ -137,27 +144,30 @@ def Decathlon(df, X_list, Y_list, W, B, cop):
     
     X_dec, Y_dec = Reshape(X_dec, Y_dec)
     
+    # Calculate and print accuracy of model on decathlon athletes
     sf = Classify(X_dec, W, B, cop)
-    dec_acc, dec_occ = Accuracy(sf, Y_dec)
+    dec_acc, dec_cm = Accuracy(sf, Y_dec)
+    dec_acc = f'{round(dec_acc * 100, 2)} %'
     
-    print(f'Accuracy of the model on decathlon is : {round(dec_acc * 100, 2)}')
+    print(f'Accuracy of the model on decathlon is : {dec_acc}')
     
-    return dec_acc, dec_occ
+    return dec_acc, dec_cm
 
 
 # ! Predict probability
 def PredProb(X, W, B):
-    lin_func = np.dot(W.T, X) + B # Linear function
-    sf = Sigmoid(lin_func) # Sigmoid function
+    lf = np.dot(W.T, X) + B # Linear function
+    sf = Sigmoid(lf) # Sigmoid function
     
     return sf
 
 
 # ! Plot ROC-curve
 def ROC(X_val, Y_val, W, B):
-    pred_prob = PredProb(X_val, W, B)
-    false_positive_rate, true_positive_rate, threshold = roc_curve(Y_val.T, pred_prob.T)
+    pred_prob = PredProb(X_val, W, B) # Get predicted probabilities
+    false_positive_rate, true_positive_rate, threshold = roc_curve(Y_val.T, pred_prob.T) # Calculate ROC-curve features
     
+    # Plot ROC-curve
     plt.subplots(1, figsize=(7,7))
     plt.title('Receiver Operating Characteristic - Logistic regression')
     plt.plot(false_positive_rate, true_positive_rate)
@@ -169,74 +179,94 @@ def ROC(X_val, Y_val, W, B):
 
 
 # ! Plot confusion matrix
-def Confusion(acc, occ):
-    tp,fp,tn,fn = 0,0,0,0
-    
-    # Sum up all occurances of False negatives and positives
-    # 1 = True Pos, 0 = True Neg, -1 = False Neg, 2 = False Pos 
-    tp += occ[1]
-    tn += occ[0]
-    fn += occ[-1]
-    fp += occ[2]
-    
-    # True positive rate - sensitivity 
-    tpr = tp / (tp + fn)
-    # False Positive - type 1 error
-    fpr = fp / (fp + tn)
-    
-    print(f'True positive rate: {round(tpr*100, 2)}')
-    print(f'False positive rate: {round(fpr*100, 2)}')
-    
-    cm =    [[tn, fp],
-            [fn, tp]]
-    
+def Confusion(acc, cm, data_title= ''):
     plt.figure(figsize=(5,5))
     sns.heatmap(cm, annot=True, fmt=".0f", square = True)
-    plt.ylabel('Actual label')
-    plt.xlabel('Predicted label')
-    all_sample_title = 'Accuracy Score: {0}'.format(round(acc * 100, 2))
-    plt.title(all_sample_title)
+    plt.ylabel('Actual outcome')
+    plt.xlabel('Predicted outcome')
+    plt.title(f'{data_title} {acc}')
     plt.show()
 
 
 # ! Plot normal distribution
 def NormDist(X, W, B):
-    x = PredProb(X, W, B)
-    sns.distplot(x.T, fit=norm)
+    x = PredProb(X, W, B) # Get predicted probability
+    sns.distplot(x.T, fit=norm) # Define distributions
     
-    #Now plot the distribution
+    # Plot distributions
     plt.ylabel('Frequency')
     plt.title('Probability Prediction Distribution')
     
-    #Get also the QQ-plot
+    # QQ-plot
     plt.figure()
     stats.probplot(x[0], plot= plt)
     plt.show()
 
 
 # ! Logistic regression model using sklearn
-def LogResModel(df, X_list, Y_list):
+def SklearnModel(df, X_list, Y_list):
     X_t, X_val, Y_t, Y_val = TrainValidate(df, X_list, Y_list)
     
-    Y_tr = np.ravel(Y_t) # change to shape (n, )
+    Y_tr = np.ravel(Y_t) # Change to shape (n, )
     
-    logisticRegr = LogisticRegression() # Model
+    logisticRegr = LogisticRegression() # Define the model
     logisticRegr.fit(X_t, Y_tr) # Train model
     
     predictions = logisticRegr.predict(X_val) # Make predictions
     
-    # Make confusion matrix and calculate acc
+    # Make cm and calculate acc
     cm = metrics.confusion_matrix(Y_val, predictions)
     score = logisticRegr.score(X_val, Y_val)
-    r_score = round(score * 100, 2)
-    print(f'Accuracy of sklearn model: {r_score}')
+    sk_acc = f'{round(score * 100, 2)} %'
     
-    plt.figure(figsize=(5,5))
-    sns.heatmap(cm, annot=True, fmt=".0f", square = True)
-    plt.ylabel('Actual label')
-    plt.xlabel('Predicted label')
-    all_sample_title = 'Accuracy Score: {0}'.format(r_score)
-    plt.title(all_sample_title)
+    print(f'Accuracy of the sklearn model is: {sk_acc}')
+    
+    return sk_acc, cm
+
+
+# ! Result tabel
+def PrintModelResults(acc_column, cm_list):
+    tpr_column = []
+    fpr_column = []
+    
+    # Calcluate the True Positive Rate and False Positive Rate
+    for i, cm in enumerate(cm_list):
+        tpr = f'{round(cm[1][1] / (cm[1][1] + cm[1][0]), 2)} %'
+        fpr = f'{round(cm[0][1] / (cm[0][1] + cm[0][0]), 2)} %'
+        tpr_column.append(tpr)
+        fpr_column.append(fpr)
+    
+    # Create dataframe of acc, tpr and fpr columns
+    report = pd.DataFrame({
+                        'ACC': acc_column,
+                        'TPR': tpr_column,
+                        'FPR': fpr_column
+                        },
+                        index= ['Validate', 'Decathlon', 'Sklearn'])
+    
+    # Plot dataframe as table
+    fig, ax = plt.subplots()
+    ax.axis('off')
+    ax.axis('tight')
+    t= ax.table(cellText=report[['ACC', 'TPR', 'FPR']].head( n=3).values, # Set header names
+                colWidths = [0.2]*len(report.columns), colColours = ['royalblue']*3, # Set header cell size and colour
+                rowLabels=report.index ,colLabels=report.columns,  loc='center') # Fill tabel
+    
+    # Set layout features
+    t.auto_set_font_size(False) 
+    t.set_fontsize(8)
+    fig.tight_layout()
+    
+    # Colour content cells white
+    for i in range(3):
+        cell = t[0,i]
+        cell.get_text().set_color('white')
+        
+    # Set header cells font to bold
+    for (row, col), cell in t.get_celld().items():
+        if (row == 0) or (col == 5):
+            cell.set_text_props(fontproperties=FontProperties(weight = 'bold'))
+    
     plt.show()
 
 
@@ -254,13 +284,19 @@ if True:
     X_list = ['PreviousMedals', 'NOC_advantage', 'Height_div_avg', 'Weight_div_avg', 'Age_div_avg']
     Y_list = ['MedalEarned']
     
+    # ! Models an tests
     cop = 0.6
-    W, B, val_acc, val_occ_dic, X_val, Y_val = RunModel(df, X_list, Y_list, cop, iterations= 80000, l_rate= 0.0223)
-    dec_acc, dec_occ = Decathlon(dec_df, X_list, Y_list, W, B, cop)
-    #NormDist(X_val, W, B)
-    ROC(X_val, Y_val, W, B)
-    Confusion(val_acc, val_occ_dic)
-    Confusion(dec_acc, dec_occ)
-    LogResModel(df, X_list, Y_list)
+    W, B, val_acc, val_cm, X_val, Y_val = RunModel(df, X_list, Y_list, cop, iterations= 80000, learning_rate= 0.0223)
+    dec_acc, dec_cm = Decathlon(dec_df, X_list, Y_list, W, B, cop)
+    sk_acc, sk_cm = SklearnModel(df, X_list, Y_list)
     
-    # TODO Make tabel to present accuracy results of the models
+    acc_list = [val_acc, dec_acc, sk_acc]
+    cm_list = [val_cm, dec_cm, sk_cm]
+    
+    # ! Result visualisations
+    NormDist(X_val, W, B)
+    ROC(X_val, Y_val, W, B)
+    PrintModelResults(acc_list, cm_list)
+    Confusion(val_acc, val_cm, 'Validation Matrix')
+    Confusion(dec_acc, dec_cm, 'Decathlon Matrix')
+    Confusion(sk_acc, sk_cm, 'Sklearn Matrix')

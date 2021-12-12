@@ -199,8 +199,8 @@ def PrintAccReport(list_of_acc_lists, list_of_occ_lists):
         #Calcluate the True Positive Rate and False Positive Rate
     for i, list_of_occ in enumerate(list_of_occ_lists):
         tpr,fpr = TPFP(list_of_occ)
-        tpr_list.append(format(tpr, ".2f"))
-        fpr_list.append(format(fpr, ".2f"))
+        tpr_list.append(f'{round(tpr*100, 2)} %')
+        fpr_list.append(f'{round(fpr*100, 2)} %')
     
     report = pd.DataFrame({
                         'Avg. Acc.' : avg_acc_list,
@@ -232,7 +232,6 @@ def PrintAccReport(list_of_acc_lists, list_of_occ_lists):
             cell.set_text_props(fontproperties=FontProperties(weight = 'bold'))
     
     plt.show()
-    
 
 
 # * Run multiple iterations of the model
