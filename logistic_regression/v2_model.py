@@ -228,19 +228,23 @@ def SklearnModel(df, X_list, Y_list):
 def PrintModelResults(acc_column, cm_list):
     tpr_column = []
     fpr_column = []
+    fdr_column = []
     
-    # Calcluate the True Positive Rate and False Positive Rate
+    # Calcluate the True Positive Rate, False Positive Rate and False Discovery Rate
     for i, cm in enumerate(cm_list):
         tpr = f'{round(cm[1][1] / (cm[1][1] + cm[1][0]), 2)}'
         fpr = f'{round(cm[0][1] / (cm[0][1] + cm[0][0]), 2)}'
+        fdr = f'{round(cm[0][1] / (cm[0][1] + cm[1][1]), 2)}'
         tpr_column.append(tpr)
         fpr_column.append(fpr)
+        fdr_column.append(fdr)
     
-    # Create dataframe of acc, tpr and fpr columns
+    # Create dataframe of acc, tpr, fpr and fdr columns
     report = pd.DataFrame({
                         'ACC': acc_column,
                         'TPR': tpr_column,
-                        'FPR': fpr_column
+                        'FPR': fpr_column,
+                        'FDR': fdr_column
                         },
                         index= ['Validate', 'Decathlon', 'Sklearn'])
     
@@ -248,8 +252,8 @@ def PrintModelResults(acc_column, cm_list):
     fig, ax = plt.subplots()
     ax.axis('off')
     ax.axis('tight')
-    t= ax.table(cellText=report[['ACC', 'TPR', 'FPR']].head( n=3).values, # Set header names
-                colWidths = [0.2]*len(report.columns), colColours = ['royalblue']*3, # Set header cell size and colour
+    t= ax.table(cellText=report[['ACC', 'TPR', 'FPR', 'FDR']].head( n=4).values, # Set header names
+                colWidths = [0.2]*len(report.columns), colColours = ['royalblue']*4, # Set header cell size and colour
                 rowLabels=report.index ,colLabels=report.columns,  loc='center') # Fill tabel
     
     # Set layout features
@@ -258,13 +262,13 @@ def PrintModelResults(acc_column, cm_list):
     fig.tight_layout()
     
     # Colour content cells white
-    for i in range(3):
+    for i in range(4):
         cell = t[0,i]
         cell.get_text().set_color('white')
-        
+    
     # Set header cells font to bold
     for (row, col), cell in t.get_celld().items():
-        if (row == 0) or (col == 5):
+        if (row == 0) or (col == 4):
             cell.set_text_props(fontproperties=FontProperties(weight = 'bold'))
     
     plt.show()

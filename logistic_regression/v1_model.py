@@ -109,8 +109,8 @@ def Model(X, Y, l_rate, iterations):
     cost_list = [] # Empty cost list
     
     for i in range(iterations):
-        lin_func = np.dot(W.T, X) + B # Linear function
-        sf = Sigmoid(lin_func) # Sigmoid function
+        lf = np.dot(W.T, X) + B # Linear function
+        sf = Sigmoid(lf) # Sigmoid function
         
         # Cost function
         cost = -(1/m)*np.sum( Y*np.log(sf) + (1-Y)*np.log(1-sf))
@@ -141,15 +141,15 @@ def RunModel(df, rng, cop, iterations, l_rate, X_list, Y_list):
     # Call Model function
     W, B, cost_list = Model(X_train, Y_train, l_rate, iterations)
     
-    sf_val = Classify(X_validate, W, B, cop)
-    val_acc, val_occ_dic = Accuracy(sf_val, Y_validate)
+    val_sf = Classify(X_validate, W, B, cop)
+    val_acc, val_occ = Accuracy(val_sf, Y_validate)
     
-    return W, B, val_acc, val_occ_dic
+    return W, B, val_acc, val_occ
 
 # * Classify winners and losers
 def Classify(X, W, B, cop):
-    lin_func = np.dot(W.T, X) + B # Linear function
-    sf = Sigmoid(lin_func) # Sigmoid function
+    lf = np.dot(W.T, X) + B # Linear function
+    sf = Sigmoid(lf) # Sigmoid function
     
     # Make sf binary array with data type int64
     sf = sf > cop # Sets sf to one if > 0 or 0 if < 0
@@ -161,8 +161,8 @@ def Classify(X, W, B, cop):
 # * Calculate accuracy of the model
 def Accuracy(sf, Y):
     # 1 = True Pos, 0 = True Neg, -1 = False Neg, 2 = False Pos 
-    guesses = sf * 2 - Y
-    occurance = [[x, list(guesses[0]).count(x)] for x in set(list(guesses[0]))]
+    predictions = sf * 2 - Y
+    occurance = [[x, list(predictions[0]).count(x)] for x in set(list(predictions[0]))]
     occ_d = {1:0, 0:0, -1:0, 2:0}
     
     # Assign value to keys e.g. TP : 22
@@ -179,38 +179,38 @@ def Accuracy(sf, Y):
 
 
 # * Print accuracy
-def PrintAccReport(list_of_acc_lists, list_of_occ_lists):
-    avg_acc_list = []
-    min_acc_list = []
-    max_acc_list = []
-    tpr_list = []
-    fpr_list = []
-    fdr_list = []
+def PrintAccReport(acc_lists, occ_lists):
+    avg_acc_column = []
+    min_acc_column = []
+    max_acc_column = []
+    tpr_column = []
+    fpr_column = []
+    fdr_column = []
     
-    for i, list_of_acc in enumerate(list_of_acc_lists):
+    for i, acc_list in enumerate(acc_lists):
         # Calculate average, min and max accuracy
-        acc_avg = round(sum(list_of_acc) / len(list_of_acc)*100, 2)
-        acc_min = round(min(list_of_acc)*100, 2)
-        acc_max = round(max(list_of_acc)*100, 2)
+        acc_avg = round(sum(acc_list) / len(acc_list)*100, 2)
+        acc_min = round(min(acc_list)*100, 2)
+        acc_max = round(max(acc_list)*100, 2)
         
-        avg_acc_list.append(f'{acc_avg} %')
-        min_acc_list.append(f'{acc_min} %')
-        max_acc_list.append(f'{acc_max} %')
+        avg_acc_column.append(f'{acc_avg} %')
+        min_acc_column.append(f'{acc_min} %')
+        max_acc_column.append(f'{acc_max} %')
         
         #Calcluate the True Positive Rate and False Positive Rate
-    for i, list_of_occ in enumerate(list_of_occ_lists):
-        tpr,fpr,fdr = TPFP(list_of_occ)
-        tpr_list.append(format(tpr, ".2f"))
-        fpr_list.append(format(fpr, ".2f"))
-        fdr_list.append(format(fdr, ".2f"))
+    for i, occ_list in enumerate(occ_lists):
+        tpr,fpr,fdr = TPFP(occ_list)
+        tpr_column.append(format(tpr, ".2f"))
+        fpr_column.append(format(fpr, ".2f"))
+        fdr_column.append(format(fdr, ".2f"))
     
     report = pd.DataFrame({
-                        'Avg. Acc.' : avg_acc_list,
-                        'Min. Acc.': min_acc_list,
-                        'Max. Acc.': max_acc_list,
-                        'TPR': tpr_list,
-                        'FPR': fpr_list,
-                        'FDR': fdr_list
+                        'Avg. Acc.' : avg_acc_column,
+                        'Min. Acc.': min_acc_column,
+                        'Max. Acc.': max_acc_column,
+                        'TPR': tpr_column,
+                        'FPR': fpr_column,
+                        'FDR': fdr_column
                         },
                         index= ['Validate', 'Test', 'Decathlon'])
     
@@ -249,28 +249,28 @@ def RunMore(df, X_list, Y_list, rng, cop, times, iterations, l_rate, save_par= F
     
     for i in range(times):
         # Run model
-        W, B, val_acc, val_occ_dic = RunModel(df_testless, rng, cop, iterations, l_rate, X_list, Y_list)
+        W, B, val_acc, val_occ = RunModel(df_testless, rng, cop, iterations, l_rate, X_list, Y_list)
         
         # Append parameters, accuracy and occurances to lists
         W_list.append(W)
         B_list.append(B)
         val_acc_list.append(val_acc)
-        val_occ_list.append(val_occ_dic)
+        val_occ_list.append(val_occ)
         
         # Progress bar
         if len(W_list) % 10 == 0:
             print(f'{times - len(W_list)} runs left.')
     
     X_test, Y_test = Reshape(X_test, Y_test)
-    test_occ_dic_list = []
+    test_occ_list = []
     test_acc_list = []
     
     # Test parameters on test data
     for i in range(len(W_list)):
-        sf_test = Classify(X_test, W_list[i], B_list[i], cop)
-        test_acc, test_occ_dic = Accuracy(sf_test, Y_test)
+        test_sf = Classify(X_test, W_list[i], B_list[i], cop)
+        test_acc, test_occ = Accuracy(test_sf, Y_test)
         test_acc_list.append(test_acc)
-        test_occ_dic_list.append(test_occ_dic)
+        test_occ_list.append(test_occ)
     
     W_array = np.concatenate(W_list, axis=1)
     B_array = np.stack(B_list)
@@ -279,7 +279,7 @@ def RunMore(df, X_list, Y_list, rng, cop, times, iterations, l_rate, save_par= F
         np.savetxt('W.csv', W_array, delimiter= ',')
         np.savetxt('B.csv', B_array, delimiter= ',')
     
-    return val_acc_list, test_acc_list, W_array, B_array, val_occ_list, test_occ_dic_list
+    return val_acc_list, test_acc_list, W_array, B_array, val_occ_list, test_occ_list
 
 
 # ! Run parameters on decathlon athletes
@@ -297,10 +297,10 @@ def Decathlon(df, X_list, Y_list, W_array, B_array, cop):
     # Test parameters on dec
     for i in range(len(W_array[0])):
         W_par = np.array([W_array[0][i], W_array[1][i], W_array[2][i]], ndmin= 0)
-        sf = Classify(X_dec, W_par, B_array[i], cop)
-        da, dod = Accuracy(sf, Y_dec)
-        dec_acc_list.append(da)
-        dec_occ_list.append(dod)
+        dec_sf = Classify(X_dec, W_par, B_array[i], cop)
+        dec_acc, dec_occ = Accuracy(dec_sf, Y_dec)
+        dec_acc_list.append(dec_acc)
+        dec_occ_list.append(dec_occ)
     
     return dec_acc_list, dec_occ_list
 
@@ -322,7 +322,7 @@ def TPFP(occ_l= []):
     # False Positive - type 1 error
     fpr = fp / (fp + tn)
     #False Discovery Rate
-    fdr = fp/(tp+fp)
+    fdr = fp / (tp + fp)
     
     return tpr, fpr, fdr
 
@@ -346,8 +346,8 @@ def Confusion(acc, occ, times = 50, data_title = ''):
     print(f'True positive rate: {round(tpr*100, 2)}')
     print(f'False positive rate: {round(fpr*100, 2)}')
     
-    cm =    [[tn, fp],
-            [fn, tp]]
+    cm = [[tn, fp],
+        [fn, tp]]
     
     plt.figure(figsize=(5,5))
     sns.heatmap(cm, annot=True, fmt=".0f", square = True)
