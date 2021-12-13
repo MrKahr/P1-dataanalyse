@@ -231,8 +231,8 @@ def PrintModelResults(acc_column, cm_list):
     
     # Calcluate the True Positive Rate and False Positive Rate
     for i, cm in enumerate(cm_list):
-        tpr = f'{round(cm[1][1] / (cm[1][1] + cm[1][0]), 2)} %'
-        fpr = f'{round(cm[0][1] / (cm[0][1] + cm[0][0]), 2)} %'
+        tpr = f'{round(cm[1][1] / (cm[1][1] + cm[1][0]), 2)}'
+        fpr = f'{round(cm[0][1] / (cm[0][1] + cm[0][0]), 2)}'
         tpr_column.append(tpr)
         fpr_column.append(fpr)
     
