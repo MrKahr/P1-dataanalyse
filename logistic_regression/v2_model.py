@@ -131,6 +131,8 @@ def RunModel(df, X_list, Y_list, cop, iterations, learning_rate):
     # Plot cost value over model iterations and print accuracy
     print(f'Accuracy of the model is : {val_acc}')
     plt.plot(np.arange(iterations), cost_list)
+    plt.xlabel('Iterations')
+    plt.ylabel('Cost')
     plt.show()
     
     return W, B, val_acc, val_cm, X_validate, Y_validate
@@ -296,7 +298,7 @@ if True:
     Y_list = ['MedalEarned']
     
     # ! Models an tests
-    cop = 0.40
+    cop = 0.4
     W, B, val_acc, val_cm, X_val, Y_val = RunModel(df, X_list, Y_list, cop, iterations= 80000, learning_rate= 0.0223)
     dec_acc, dec_cm = Decathlon(dec_df, X_list, Y_list, W, B, cop)
     sk_acc, sk_cm = SklearnModel(df, X_list, Y_list)
