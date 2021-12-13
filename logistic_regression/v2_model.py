@@ -131,6 +131,8 @@ def RunModel(df, X_list, Y_list, cop, iterations, learning_rate):
     # Plot cost value over model iterations and print accuracy
     print(f'Accuracy of the model is : {val_acc}')
     plt.plot(np.arange(iterations), cost_list)
+    plt.xlabel('Iterations')
+    plt.ylabel('Cost')
     plt.show()
     
     return W, B, val_acc, val_cm, X_validate, Y_validate
@@ -167,6 +169,7 @@ def ROC(X_val, Y_val, W, B):
     pred_prob = PredProb(X_val, W, B) # Get predicted probabilities
     false_positive_rate, true_positive_rate, threshold = roc_curve(Y_val.T, pred_prob.T) # Calculate ROC-curve features
     
+    #Locate cop off point (threshold) with highest TPR and lowest FPR
     i = np.arange(len(true_positive_rate)) 
     roc = pd.DataFrame({'tf' : pd.Series(true_positive_rate - (1 - false_positive_rate), index=i), 'threshold' : pd.Series(threshold, index=i)})
     roc_t = roc.iloc[(roc.tf-0).abs().argsort()[:1]]
@@ -295,7 +298,7 @@ if True:
     Y_list = ['MedalEarned']
     
     # ! Models an tests
-    cop = 0.6
+    cop = 0.4
     W, B, val_acc, val_cm, X_val, Y_val = RunModel(df, X_list, Y_list, cop, iterations= 80000, learning_rate= 0.0223)
     dec_acc, dec_cm = Decathlon(dec_df, X_list, Y_list, W, B, cop)
     sk_acc, sk_cm = SklearnModel(df, X_list, Y_list)
@@ -306,7 +309,7 @@ if True:
     # ! Result visualisations
     #NormDist(X_val, W, B)
     ROC(X_val, Y_val, W, B)
-    #PrintModelResults(acc_list, cm_list)
-    #Confusion(val_acc, val_cm, 'Validation Matrix')
-    #Confusion(dec_acc, dec_cm, 'Decathlon Matrix')
-    #Confusion(sk_acc, sk_cm, 'Sklearn Matrix')
+    PrintModelResults(acc_list, cm_list)
+    Confusion(val_acc, val_cm, 'Validation Matrix')
+    Confusion(dec_acc, dec_cm, 'Decathlon Matrix')
+    Confusion(sk_acc, sk_cm, 'Sklearn Matrix')
