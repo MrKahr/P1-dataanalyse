@@ -167,9 +167,15 @@ def ROC(X_val, Y_val, W, B):
     pred_prob = PredProb(X_val, W, B) # Get predicted probabilities
     false_positive_rate, true_positive_rate, threshold = roc_curve(Y_val.T, pred_prob.T) # Calculate ROC-curve features
     
+    i = np.arange(len(true_positive_rate)) 
+    roc = pd.DataFrame({'tf' : pd.Series(true_positive_rate - (1 - false_positive_rate), index=i), 'threshold' : pd.Series(threshold, index=i)})
+    roc_t = roc.iloc[(roc.tf-0).abs().argsort()[:1]]
+    
+    opt_cop = round(list(roc_t['threshold'])[0], 2)
+    
     # Plot ROC-curve
     plt.subplots(1, figsize=(7,7))
-    plt.title('Receiver Operating Characteristic - Logistic regression')
+    plt.title(f'Receiver Operating Characteristic \nOptimal cut off point: {opt_cop}')
     plt.plot(false_positive_rate, true_positive_rate)
     plt.plot([0, 1], ls="--")
     plt.plot([0, 0], [1, 0] , c=".7"), plt.plot([1, 1] , c=".7")
@@ -298,9 +304,9 @@ if True:
     cm_list = [val_cm, dec_cm, sk_cm]
     
     # ! Result visualisations
-    NormDist(X_val, W, B)
+    #NormDist(X_val, W, B)
     ROC(X_val, Y_val, W, B)
-    PrintModelResults(acc_list, cm_list)
-    Confusion(val_acc, val_cm, 'Validation Matrix')
-    Confusion(dec_acc, dec_cm, 'Decathlon Matrix')
-    Confusion(sk_acc, sk_cm, 'Sklearn Matrix')
+    #PrintModelResults(acc_list, cm_list)
+    #Confusion(val_acc, val_cm, 'Validation Matrix')
+    #Confusion(dec_acc, dec_cm, 'Decathlon Matrix')
+    #Confusion(sk_acc, sk_cm, 'Sklearn Matrix')
