@@ -235,7 +235,6 @@ def PrintAccReport(list_of_acc_lists, list_of_occ_lists):
             cell.set_text_props(fontproperties=FontProperties(weight = 'bold'))
     
     plt.show()
-    
 
 
 # * Run multiple iterations of the model
