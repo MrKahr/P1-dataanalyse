@@ -307,7 +307,7 @@ if True:
     cm_list = [val_cm, dec_cm, sk_cm]
     
     # ! Result visualisations
-    NormDist(X_val, W, B)
+    #NormDist(X_val, W, B)
     ROC(X_val, Y_val, W, B)
     PrintModelResults(acc_list, cm_list)
     Confusion(val_acc, val_cm, 'Validation Matrix')
