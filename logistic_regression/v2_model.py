@@ -283,7 +283,7 @@ def PrintModelResults(acc_column, cm_list):
     plt.show()
 
 
-if False:
+if True:
     # ! Import datasets
     filepath = 'Datasets/expert_data.csv'
     df = pd.read_csv(filepath)

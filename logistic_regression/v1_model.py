@@ -358,7 +358,7 @@ def Confusion(acc, occ, times = 50, data_title = ''):
 
 
 # ! Run the model
-if False:
+if True:
     filepath = 'Datasets/Datasets_we_dont_need/dec_sep_MPHWA.csv'
     df = pd.read_csv(filepath)
     df= df.reset_index()
