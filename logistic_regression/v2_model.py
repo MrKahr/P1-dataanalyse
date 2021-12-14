@@ -255,7 +255,8 @@ def PrintModelResults(acc_column, cm_list):
                         'FPR': fpr_column,
                         'FDR': fdr_column
                         },
-                        index= ['Validate', 'Decathlon', 'Sklearn'])
+                        index = ['Validate', 'Decathlon'])
+                        #index= ['Validate', 'Decathlon', 'Sklearn'])
     
     # Plot dataframe as table
     fig, ax = plt.subplots()
@@ -298,17 +299,19 @@ if True:
     Y_list = ['MedalEarned']
     
     # ! Models an tests
-    cop = 0.4
+    cop = 0.40
     W, B, val_acc, val_cm, X_val, Y_val = RunModel(df, X_list, Y_list, cop, iterations= 80000, learning_rate= 0.0223)
     dec_acc, dec_cm = Decathlon(dec_df, X_list, Y_list, W, B, cop)
     sk_acc, sk_cm = SklearnModel(df, X_list, Y_list)
     
-    acc_list = [val_acc, dec_acc, sk_acc]
-    cm_list = [val_cm, dec_cm, sk_cm]
+    acc_list = [val_acc, dec_acc]
+    cm_list = [val_cm, dec_cm]
+    #acc_list = [val_acc, dec_acc, sk_acc]
+    #cm_list = [val_cm, dec_cm, sk_cm]
     
     # ! Result visualisations
     #NormDist(X_val, W, B)
-    ROC(X_val, Y_val, W, B)
+    #ROC(X_val, Y_val, W, B)
     PrintModelResults(acc_list, cm_list)
     Confusion(val_acc, val_cm, 'Validation Matrix')
     Confusion(dec_acc, dec_cm, 'Decathlon Matrix')
