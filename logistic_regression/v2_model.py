@@ -246,7 +246,7 @@ def SklearnModel(df, X_list, Y_list):
 
 
 # ! Result tabel
-def PrintModelResults(acc_column, cm_list):
+def PrintModelResults(acc_column, cm_list, name_list):
     tpr_column = []
     fpr_column = []
     fdr_column = []
@@ -271,7 +271,7 @@ def PrintModelResults(acc_column, cm_list):
                         'FDR': fdr_column,
                         'PPV': ppv_column
                         },
-                        index= ['Validate', 'Decathlon', 'Sklearn', 'Random'])
+                        index= name_list)
     
     column_count = len(report.columns)
     
@@ -322,13 +322,17 @@ if __name__ == '__main__':
     sk_acc, sk_cm = SklearnModel(df, X_list, Y_list)
     rand_acc, rand_cm = RandomPredictions(X_dec, Y_dec)
     
-    acc_list = [val_acc, dec_acc, sk_acc, rand_acc]
-    cm_list = [val_cm, dec_cm, sk_cm, rand_cm]
-    
+    acc_list = [val_acc, dec_acc, rand_acc]
+    cm_list = [val_cm, dec_cm, rand_cm]
+    name_list = ['Validate', 'Decathlon', 'Random']
+    acc_list_2 = [sk_acc]
+    cm_list_2 = [sk_cm]
+    name_list_2 = ['Sklearn']
     # ! Result visualisations
     #NormDist(X_val, W, B)
     #ROC(X_val, Y_val, W, B)
-    PrintModelResults(acc_list, cm_list)
+    PrintModelResults(acc_list, cm_list, name_list)
+    PrintModelResults(acc_list_2, cm_list_2, name_list_2)
     #Confusion(val_acc, val_cm, 'Validation Matrix')
     #Confusion(dec_acc, dec_cm, 'Decathlon Matrix')
     #Confusion(sk_acc, sk_cm, 'Sklearn Matrix')
