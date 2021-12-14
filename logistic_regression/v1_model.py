@@ -186,6 +186,7 @@ def PrintAccReport(acc_lists, occ_lists):
     tpr_column = []
     fpr_column = []
     fdr_column = []
+    ppv_column = []
     
     for i, acc_list in enumerate(acc_lists):
         # Calculate average, min and max accuracy
@@ -199,10 +200,11 @@ def PrintAccReport(acc_lists, occ_lists):
         
         #Calcluate the True Positive Rate and False Positive Rate
     for i, occ_list in enumerate(occ_lists):
-        tpr,fpr,fdr = TPFP(occ_list)
+        tpr,fpr,fdr, ppv = TPFP(occ_list)
         tpr_column.append(format(tpr, ".2f"))
         fpr_column.append(format(fpr, ".2f"))
         fdr_column.append(format(fdr, ".2f"))
+        ppv_column.append(format(ppv, ".2f"))
     
     report = pd.DataFrame({
                         'Avg. Acc.' : avg_acc_column,
@@ -210,28 +212,29 @@ def PrintAccReport(acc_lists, occ_lists):
                         'Max. Acc.': max_acc_column,
                         'TPR': tpr_column,
                         'FPR': fpr_column,
-                        'FDR': fdr_column
+                        'FDR': fdr_column,
+                        'PPV': ppv_column
                         },
                         index= ['Validate', 'Test', 'Decathlon'])
     
     fig, ax = plt.subplots()
     ax.axis('off')
     ax.axis('tight')
-    t= ax.table(cellText=report[['Avg. Acc.', 'Min. Acc.', 'Max. Acc.', 'TPR', 'FPR', 'FDR']].head( n=3).values,
-                colWidths = [0.2]*len(report.columns), colColours = ['royalblue']*6,
+    t= ax.table(cellText=report[['Avg. Acc.', 'Min. Acc.', 'Max. Acc.', 'TPR', 'FPR', 'FDR', 'PPV']].head( n=3).values,
+                colWidths = [0.2]*len(report.columns), colColours = ['royalblue']*7,
                 rowLabels=report.index ,colLabels=report.columns,  loc='center')
     
     t.auto_set_font_size(False) 
     t.set_fontsize(8)
-    fig.tight_layout()
+    #fig.tight_layout()
     
-    for i in range(6):
+    for i in range(7):
         cell = t[0,i]
         cell.get_text().set_color('white')
         
         
     for (row, col), cell in t.get_celld().items():
-        if (row == 0) or (col == 6):
+        if (row == 0) or (col == 7):
             cell.set_text_props(fontproperties=FontProperties(weight = 'bold'))
     
     plt.show()
@@ -323,8 +326,10 @@ def TPFP(occ_l= []):
     fpr = fp / (fp + tn)
     #False Discovery Rate
     fdr = fp / (tp + fp)
+    #Positive Prediction Value
+    ppv = tp / (tp + fp)
     
-    return tpr, fpr, fdr
+    return tpr, fpr, fdr, ppv
 
 # ! Plot confusion matrix
 def Confusion(acc, occ, times = 50, data_title = ''):
