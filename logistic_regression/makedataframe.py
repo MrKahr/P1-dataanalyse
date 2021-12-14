@@ -38,7 +38,7 @@ def Reduction2(df):
     return df
 
 
-def AddTheese(df, name, medal= True, prev_med= True, div_avg= True, div_avg_event= False, reduce= True, strength= True):
+def AddTheese(df, name, medal= True, prev_med= True, div_avg= True, div_avg_event= True, reduce= True, strength= True):
     # * Add MedalEarned column to dataframe
     if medal:
         df = add.MedalEarned(df)
@@ -76,4 +76,4 @@ def AddTheese(df, name, medal= True, prev_med= True, div_avg= True, div_avg_even
     df.to_csv(name + '.csv')
 
 
-AddTheese(df, 'decathlon_data')
+AddTheese(df, 'decathlon_data', div_avg_event= False)
