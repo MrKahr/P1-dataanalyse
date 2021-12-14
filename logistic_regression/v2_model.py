@@ -319,15 +319,16 @@ if __name__ == '__main__':
     cop = 0.4
     W, B, val_acc, val_cm, X_val, Y_val = RunModel(df, X_list, Y_list, cop, iterations= 80000, learning_rate= 0.0223)
     dec_acc, dec_cm, X_dec, Y_dec = Decathlon(dec_df, X_list, Y_list, W, B, cop)
-    sk_acc, sk_cm = SklearnModel(df, X_list, Y_list)
+    sk_acc_val, sk_cm_val = SklearnModel(df, X_list, Y_list)
+    sk_acc_dec, sk_cm_dec = SklearnModel(dec_df, X_list, Y_list)
     rand_acc, rand_cm = RandomPredictions(X_dec, Y_dec)
     
     acc_list = [val_acc, dec_acc, rand_acc]
     cm_list = [val_cm, dec_cm, rand_cm]
     name_list = ['Validate', 'Decathlon', 'Random']
-    acc_list_2 = [sk_acc]
-    cm_list_2 = [sk_cm]
-    name_list_2 = ['Sklearn']
+    acc_list_2 = [sk_acc_val,sk_acc_dec]
+    cm_list_2 = [sk_cm_val,sk_cm_dec]
+    name_list_2 = ['SK - Validation', 'SK - Decathlon']
     # ! Result visualisations
     #NormDist(X_val, W, B)
     #ROC(X_val, Y_val, W, B)
