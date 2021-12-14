@@ -1,4 +1,4 @@
-,ID,Name,Sex,Age,Height,Weight,Team,NOC,Games,Year,Season,City,Sport,Event,Medal,MedalEarned,PreviousMedals,NOC_advantage,Height_div_avg,Weight_div_avg,Age_div_avg
+,ID,Name,Sex,Age,Height,Weight,Team,NOC,Games,Year,Season,City,Sport,Event,Medal,MedalEarned,PreviousMedals,NOC_advantage,Height_Dev,Weight_Dev,Age_Dev
 703,402,Arthur Abele,M,22.0,184.0,85.0,Germany,GER,2008 Summer,2008,Summer,Beijing,Athletics,Athletics Men's Decathlon,,0,0,0.0,-5.95,-2.35,-3.38
 704,402,Arthur Abele,M,30.0,184.0,85.0,Germany,GER,2016 Summer,2016,Summer,Rio de Janeiro,Athletics,Athletics Men's Decathlon,,0,0,0.0,-4.1,0.7,3.6
 1593,888,Jangy McKinley Addy,M,23.0,188.0,88.0,Liberia,LBR,2008 Summer,2008,Summer,Beijing,Athletics,Athletics Men's Decathlon,,0,0,0.0,-1.95,0.65,-2.38

@@ -17,10 +17,10 @@ def DeviationAverage(df, vals):
             # Locate average value for given year
             avg_val = df_g_s.loc[row['Year'], val]
             # Calculate diviation from average for given year
-            div_avg = round(row[val] - avg_val, 2)
+            dev_avg = round(row[val] - avg_val, 2)
             
             # Add diviation to new column in df
-            df.at[i, f'{val}_div_avg'] = div_avg
+            df.at[i, f'{val}_Dev'] = dev_avg
     
     return df
 
@@ -28,18 +28,14 @@ def DeviationAverage(df, vals):
 # ! Find diviation from average per year per event for given variable and add column to df
 def DeviationAverageEvent(df, vals):
     df = df.reset_index()
-    print(df.info())
+    
     for i in range(len(vals)):
-        print(1)        
         val = vals[i]
-        df_x = pd.DataFrame(index= range(len(df)), columns= [f'{val}_div_avg'])
-        print(2)
+        df_x = pd.DataFrame(index= range(len(df)), columns= [f'{val}_Dev_Event'])
         
         # Make df of average values for given variable per year
         df_g = df.groupby(['Year', 'Event'])[val].mean()
-        print(3)
         df_g_r = df_g.reset_index()
-        print(4)
         
         # iterate over given df
         for i, row in df.iterrows():
@@ -47,19 +43,14 @@ def DeviationAverageEvent(df, vals):
             df_c = df_c.reset_index()
             
             avg_val = df_c.loc[0, val]
-            #print(avg_val)
             
             # Calculate diviation from average for given year
             div_avg = round(row[val] - avg_val, 2)
             
-            #print(i)
-            
             # Add diviation to new column in df
-            df_x.at[i, f'{val}_div_avg'] = div_avg
+            df_x.at[i, f'{val}_Dev_Event'] = div_avg
         
-        print(5)
         df = pd.concat([df,df_x], axis= 1)
-        print(df.info())
     
     return df
 

@@ -209,23 +209,8 @@ def Confusion(acc, cm, data_title= ''):
     plt.show()
 
 
-# ! Plot normal distribution
-def NormDist(X, W, B):
-    x = PredProb(X, W, B) # Get predicted probability
-    sns.distplot(x.T, fit=norm) # Define distributions
-    
-    # Plot distributions
-    plt.ylabel('Frequency')
-    plt.title('Probability Prediction Distribution')
-    
-    # QQ-plot
-    plt.figure()
-    stats.probplot(x[0], plot= plt)
-    plt.show()
-
-
 # ! Logistic regression model using sklearn
-def SklearnModel(df, X_list, Y_list):
+def SklearnModel(df, dec_df, X_list, Y_list, X_list_dec):
     X_t, X_val, Y_t, Y_val = TrainValidate(df, X_list, Y_list)
     
     Y_tr = np.ravel(Y_t) # Change to shape (n, )
@@ -240,9 +225,24 @@ def SklearnModel(df, X_list, Y_list):
     score = logisticRegr.score(X_val, Y_val)
     sk_acc = f'{round(score * 100, 2)} %'
     
-    print(f'Accuracy of the sklearn model is: {sk_acc}')
+    print(f'Accuracy of the sklearn val model is: {sk_acc}')
     
-    return sk_acc, cm
+    # Reduce and split X and Y dataframes
+    X_dec = dec_df[X_list_dec]
+    Y_dec = dec_df[Y_list]
+    
+    X_dec, Y_dec = Reshape(X_dec, Y_dec)
+    
+    predictions_dec = logisticRegr.predict(X_dec.T) # Make predictions
+    
+    # Make cm and calculate acc
+    cm_dec = metrics.confusion_matrix(Y_dec.T, predictions_dec)
+    score_dec = logisticRegr.score(X_dec.T, Y_dec.T)
+    sk_acc_dec = f'{round(score_dec * 100, 2)} %'
+    
+    print(f'Accuracy of the sklearn dec model is: {sk_acc_dec}')
+    
+    return sk_acc, cm, sk_acc_dec, cm_dec
 
 
 # ! Result tabel
@@ -312,28 +312,39 @@ if __name__ == '__main__':
     dec_df = dec_df.reset_index()
     
     # ! Training features
-    X_list = ['PreviousMedals', 'NOC_advantage', 'Height_div_avg', 'Weight_div_avg', 'Age_div_avg']
+    X_list = ['PreviousMedals', 'NOC_advantage', 'Height_Dev_Event', 'Weight_Dev_Event', 'Age_Dev_Event']
+    X_list_dec = ['PreviousMedals', 'NOC_advantage', 'Height_Dev', 'Weight_Dev', 'Age_Dev']
     Y_list = ['MedalEarned']
     
     # ! Models an tests
-    cop = 0.4
-    W, B, val_acc, val_cm, X_val, Y_val = RunModel(df, X_list, Y_list, cop, iterations= 80000, learning_rate= 0.0223)
-    dec_acc, dec_cm, X_dec, Y_dec = Decathlon(dec_df, X_list, Y_list, W, B, cop)
-    sk_acc, sk_cm = SklearnModel(df, X_list, Y_list)
+    # * Normal deviation
+    #cop = 0.4
+    #W, B, val_acc, val_cm, X_val, Y_val = RunModel(df, X_list_dec, Y_list, cop, iterations= 80000, learning_rate= 0.0223)
+    
+    # * Deviation per Event
+    cop = 0.42
+    W, B, val_acc, val_cm, X_val, Y_val = RunModel(df, X_list, Y_list, cop, iterations= 19000, learning_rate= 0.13)
+    
+    dec_acc, dec_cm, X_dec, Y_dec = Decathlon(dec_df, X_list_dec, Y_list, W, B, cop)
+    sk_acc_val, sk_cm_val, sk_acc_dec, sk_cm_dec = SklearnModel(df, dec_df, X_list, Y_list, X_list_dec)
     rand_acc, rand_cm = RandomPredictions(X_dec, Y_dec)
     
     acc_list = [val_acc, dec_acc, rand_acc]
     cm_list = [val_cm, dec_cm, rand_cm]
     name_list = ['Validate', 'Decathlon', 'Random']
-    acc_list_2 = [sk_acc]
-    cm_list_2 = [sk_cm]
-    name_list_2 = ['Sklearn']
+    
+    acc_list_sk = [sk_acc_val, sk_acc_dec]
+    cm_list_sk = [sk_cm_val, sk_cm_dec]
+    name_list_sk = ['Sklearn_val', 'Sklearn_dec']
+    
     # ! Result visualisations
-    #NormDist(X_val, W, B)
     #ROC(X_val, Y_val, W, B)
     PrintModelResults(acc_list, cm_list, name_list)
-    PrintModelResults(acc_list_2, cm_list_2, name_list_2)
-    #Confusion(val_acc, val_cm, 'Validation Matrix')
-    #Confusion(dec_acc, dec_cm, 'Decathlon Matrix')
-    #Confusion(sk_acc, sk_cm, 'Sklearn Matrix')
+    PrintModelResults(acc_list_sk, cm_list_sk, name_list_sk)
+    Confusion(val_acc, val_cm, 'Validation Matrix')
+    Confusion(dec_acc, dec_cm, 'Decathlon Matrix')
+    
+    Confusion(sk_acc_val, sk_cm_val, 'Sklearn val Matrix')
+    Confusion(sk_acc_dec, sk_cm_dec, 'Sklearn dec Matrix')
+    
     #Confusion(rand_acc, rand_cm, 'Random Pred. Matrix')
