@@ -151,9 +151,21 @@ def Decathlon(df, X_list, Y_list, W, B, cop):
     dec_acc, dec_cm = Accuracy(sf, Y_dec)
     dec_acc = f'{round(dec_acc * 100, 2)} %'
     
-    print(f'Accuracy of the model on decathlon is : {dec_acc}')
+    print(f'Accuracy of the model on decathlon is: {dec_acc}')
     
-    return dec_acc, dec_cm
+    return dec_acc, dec_cm, X_dec, Y_dec
+
+
+# ! Random predictions
+def RandomPredictions(X, Y):
+    np.random.seed(1)
+    prediction = np.random.randint(2, size= len(X.T))
+    rand_acc, rand_cm = Accuracy(prediction, Y)
+    rand_acc = f'{round(rand_acc * 100, 2)} %'
+    
+    print(f'Accuracy of random predictions is: {rand_acc}')
+    
+    return rand_acc, rand_cm
 
 
 # ! Predict probability
@@ -234,35 +246,41 @@ def SklearnModel(df, X_list, Y_list):
 
 
 # ! Result tabel
-def PrintModelResults(acc_column, cm_list):
+def PrintModelResults(acc_column, cm_list, name_list):
     tpr_column = []
     fpr_column = []
     fdr_column = []
+    ppv_column = []
     
     # Calcluate the True Positive Rate, False Positive Rate and False Discovery Rate
     for i, cm in enumerate(cm_list):
         tpr = f'{round(cm[1][1] / (cm[1][1] + cm[1][0]), 2)}'
         fpr = f'{round(cm[0][1] / (cm[0][1] + cm[0][0]), 2)}'
         fdr = f'{round(cm[0][1] / (cm[0][1] + cm[1][1]), 2)}'
+        ppv = f'{round(cm[1][1] / (cm[0][1] + cm[1][1]), 2)}'
         tpr_column.append(tpr)
         fpr_column.append(fpr)
         fdr_column.append(fdr)
+        ppv_column.append(ppv)
     
     # Create dataframe of acc, tpr, fpr and fdr columns
     report = pd.DataFrame({
                         'ACC': acc_column,
                         'TPR': tpr_column,
                         'FPR': fpr_column,
-                        'FDR': fdr_column
+                        'FDR': fdr_column,
+                        'PPV': ppv_column
                         },
-                        index= ['Validate', 'Decathlon', 'Sklearn'])
+                        index= name_list)
+    
+    column_count = len(report.columns)
     
     # Plot dataframe as table
     fig, ax = plt.subplots()
     ax.axis('off')
     ax.axis('tight')
-    t= ax.table(cellText=report[['ACC', 'TPR', 'FPR', 'FDR']].head( n=4).values, # Set header names
-                colWidths = [0.2]*len(report.columns), colColours = ['royalblue']*4, # Set header cell size and colour
+    t= ax.table(cellText=report[['ACC', 'TPR', 'FPR', 'FDR', 'PPV']].head( n= column_count).values, # Set header names
+                colWidths = [0.2]*len(report.columns), colColours = ['royalblue']*column_count, # Set header cell size and colour
                 rowLabels=report.index ,colLabels=report.columns,  loc='center') # Fill tabel
     
     # Set layout features
@@ -271,19 +289,19 @@ def PrintModelResults(acc_column, cm_list):
     fig.tight_layout()
     
     # Colour content cells white
-    for i in range(4):
+    for i in range(column_count):
         cell = t[0,i]
         cell.get_text().set_color('white')
     
     # Set header cells font to bold
     for (row, col), cell in t.get_celld().items():
-        if (row == 0) or (col == 4):
+        if (row == 0) or (col == column_count):
             cell.set_text_props(fontproperties=FontProperties(weight = 'bold'))
     
     plt.show()
 
 
-if False:
+if __name__ == '__main__':
     # ! Import datasets
     filepath = 'Datasets/expert_data.csv'
     df = pd.read_csv(filepath)
@@ -300,16 +318,22 @@ if False:
     # ! Models an tests
     cop = 0.4
     W, B, val_acc, val_cm, X_val, Y_val = RunModel(df, X_list, Y_list, cop, iterations= 80000, learning_rate= 0.0223)
-    dec_acc, dec_cm = Decathlon(dec_df, X_list, Y_list, W, B, cop)
+    dec_acc, dec_cm, X_dec, Y_dec = Decathlon(dec_df, X_list, Y_list, W, B, cop)
     sk_acc, sk_cm = SklearnModel(df, X_list, Y_list)
+    rand_acc, rand_cm = RandomPredictions(X_dec, Y_dec)
     
-    acc_list = [val_acc, dec_acc, sk_acc]
-    cm_list = [val_cm, dec_cm, sk_cm]
-    
+    acc_list = [val_acc, dec_acc, rand_acc]
+    cm_list = [val_cm, dec_cm, rand_cm]
+    name_list = ['Validate', 'Decathlon', 'Random']
+    acc_list_2 = [sk_acc]
+    cm_list_2 = [sk_cm]
+    name_list_2 = ['Sklearn']
     # ! Result visualisations
     #NormDist(X_val, W, B)
-    ROC(X_val, Y_val, W, B)
-    PrintModelResults(acc_list, cm_list)
-    Confusion(val_acc, val_cm, 'Validation Matrix')
-    Confusion(dec_acc, dec_cm, 'Decathlon Matrix')
-    Confusion(sk_acc, sk_cm, 'Sklearn Matrix')
+    #ROC(X_val, Y_val, W, B)
+    PrintModelResults(acc_list, cm_list, name_list)
+    PrintModelResults(acc_list_2, cm_list_2, name_list_2)
+    #Confusion(val_acc, val_cm, 'Validation Matrix')
+    #Confusion(dec_acc, dec_cm, 'Decathlon Matrix')
+    #Confusion(sk_acc, sk_cm, 'Sklearn Matrix')
+    #Confusion(rand_acc, rand_cm, 'Random Pred. Matrix')
