@@ -1,3 +1,9 @@
+'''
+Credit to GitHub user Jaimin09
+Link: https://github.com/Jaimin09/Coding-Lane-Assets/tree/main/Logistic%20Regression%20in%20Python%20from%20Scratch
+Last accessed: 28/10/2021
+'''
+
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
