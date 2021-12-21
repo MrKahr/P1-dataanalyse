@@ -12,8 +12,6 @@ from sklearn import metrics
 from imblearn.over_sampling import RandomOverSampler
 import matplotlib.pyplot as plt
 import seaborn as sns
-from scipy import stats
-from scipy.stats import norm
 from matplotlib.font_manager import FontProperties
 from sklearn.linear_model import LogisticRegression
 
@@ -353,4 +351,4 @@ if __name__ == '__main__':
     Confusion(sk_acc_val, sk_cm_val, 'Sklearn val Matrix')
     Confusion(sk_acc_dec, sk_cm_dec, 'Sklearn dec Matrix')
     
-    #Confusion(rand_acc, rand_cm, 'Random Pred. Matrix')
+    Confusion(rand_acc, rand_cm, 'Random Pred. Matrix')

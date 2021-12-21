@@ -146,6 +146,7 @@ def RunModel(df, rng, cop, iterations, l_rate, X_list, Y_list):
     
     return W, B, val_acc, val_occ
 
+
 # * Classify winners and losers
 def Classify(X, W, B, cop):
     lf = np.dot(W.T, X) + B # Linear function
@@ -231,8 +232,7 @@ def PrintAccReport(acc_lists, occ_lists):
     for i in range(7):
         cell = t[0,i]
         cell.get_text().set_color('white')
-        
-        
+    
     for (row, col), cell in t.get_celld().items():
         if (row == 0) or (col == 7):
             cell.set_text_props(fontproperties=FontProperties(weight = 'bold'))
