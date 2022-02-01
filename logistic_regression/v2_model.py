@@ -338,7 +338,7 @@ if __name__ == '__main__':
     name_list_sk = ['Sklearn_val', 'Sklearn_dec']
     
     # ! Result visualisations
-    #ROC(X_val, Y_val, W, B)
+    ROC(X_val, Y_val, W, B)
     PrintModelResults(acc_list, cm_list, name_list)
     PrintModelResults(acc_list_sk, cm_list_sk, name_list_sk)
     Confusion(val_acc, val_cm, 'Validation Matrix')
